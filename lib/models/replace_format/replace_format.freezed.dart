@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'template_model.dart';
+part of 'replace_format.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -14,12 +14,12 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-TemplateModel _$TemplateModelFromJson(Map<String, dynamic> json) {
-  return _TemplateModel.fromJson(json);
+ReplaceFormat _$ReplaceFormatFromJson(Map<String, dynamic> json) {
+  return _ReplaceFormat.fromJson(json);
 }
 
 /// @nodoc
-mixin _$TemplateModel {
+mixin _$ReplaceFormat {
   String get templateId => throw _privateConstructorUsedError;
   String get templateName => throw _privateConstructorUsedError;
   String get thumbnailImage => throw _privateConstructorUsedError;
@@ -28,15 +28,15 @@ mixin _$TemplateModel {
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $TemplateModelCopyWith<TemplateModel> get copyWith =>
+  $ReplaceFormatCopyWith<ReplaceFormat> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TemplateModelCopyWith<$Res> {
-  factory $TemplateModelCopyWith(
-          TemplateModel value, $Res Function(TemplateModel) then) =
-      _$TemplateModelCopyWithImpl<$Res, TemplateModel>;
+abstract class $ReplaceFormatCopyWith<$Res> {
+  factory $ReplaceFormatCopyWith(
+          ReplaceFormat value, $Res Function(ReplaceFormat) then) =
+      _$ReplaceFormatCopyWithImpl<$Res, ReplaceFormat>;
   @useResult
   $Res call(
       {String templateId,
@@ -49,9 +49,9 @@ abstract class $TemplateModelCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TemplateModelCopyWithImpl<$Res, $Val extends TemplateModel>
-    implements $TemplateModelCopyWith<$Res> {
-  _$TemplateModelCopyWithImpl(this._value, this._then);
+class _$ReplaceFormatCopyWithImpl<$Res, $Val extends ReplaceFormat>
+    implements $ReplaceFormatCopyWith<$Res> {
+  _$ReplaceFormatCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -101,11 +101,11 @@ class _$TemplateModelCopyWithImpl<$Res, $Val extends TemplateModel>
 }
 
 /// @nodoc
-abstract class _$$TemplateModelImplCopyWith<$Res>
-    implements $TemplateModelCopyWith<$Res> {
-  factory _$$TemplateModelImplCopyWith(
-          _$TemplateModelImpl value, $Res Function(_$TemplateModelImpl) then) =
-      __$$TemplateModelImplCopyWithImpl<$Res>;
+abstract class _$$ReplaceFormatImplCopyWith<$Res>
+    implements $ReplaceFormatCopyWith<$Res> {
+  factory _$$ReplaceFormatImplCopyWith(
+          _$ReplaceFormatImpl value, $Res Function(_$ReplaceFormatImpl) then) =
+      __$$ReplaceFormatImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -120,11 +120,11 @@ abstract class _$$TemplateModelImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$TemplateModelImplCopyWithImpl<$Res>
-    extends _$TemplateModelCopyWithImpl<$Res, _$TemplateModelImpl>
-    implements _$$TemplateModelImplCopyWith<$Res> {
-  __$$TemplateModelImplCopyWithImpl(
-      _$TemplateModelImpl _value, $Res Function(_$TemplateModelImpl) _then)
+class __$$ReplaceFormatImplCopyWithImpl<$Res>
+    extends _$ReplaceFormatCopyWithImpl<$Res, _$ReplaceFormatImpl>
+    implements _$$ReplaceFormatImplCopyWith<$Res> {
+  __$$ReplaceFormatImplCopyWithImpl(
+      _$ReplaceFormatImpl _value, $Res Function(_$ReplaceFormatImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -136,7 +136,7 @@ class __$$TemplateModelImplCopyWithImpl<$Res>
     Object? replaceData = null,
     Object? createdAt = null,
   }) {
-    return _then(_$TemplateModelImpl(
+    return _then(_$ReplaceFormatImpl(
       templateId: null == templateId
           ? _value.templateId
           : templateId // ignore: cast_nullable_to_non_nullable
@@ -163,16 +163,16 @@ class __$$TemplateModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$TemplateModelImpl implements _TemplateModel {
-  const _$TemplateModelImpl(
+class _$ReplaceFormatImpl implements _ReplaceFormat {
+  const _$ReplaceFormatImpl(
       {required this.templateId,
       required this.templateName,
       required this.thumbnailImage,
       required this.replaceData,
       required this.createdAt});
 
-  factory _$TemplateModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$TemplateModelImplFromJson(json);
+  factory _$ReplaceFormatImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ReplaceFormatImplFromJson(json);
 
   @override
   final String templateId;
@@ -187,14 +187,14 @@ class _$TemplateModelImpl implements _TemplateModel {
 
   @override
   String toString() {
-    return 'TemplateModel(templateId: $templateId, templateName: $templateName, thumbnailImage: $thumbnailImage, replaceData: $replaceData, createdAt: $createdAt)';
+    return 'ReplaceFormat(templateId: $templateId, templateName: $templateName, thumbnailImage: $thumbnailImage, replaceData: $replaceData, createdAt: $createdAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$TemplateModelImpl &&
+            other is _$ReplaceFormatImpl &&
             (identical(other.templateId, templateId) ||
                 other.templateId == templateId) &&
             (identical(other.templateName, templateName) ||
@@ -215,27 +215,27 @@ class _$TemplateModelImpl implements _TemplateModel {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$TemplateModelImplCopyWith<_$TemplateModelImpl> get copyWith =>
-      __$$TemplateModelImplCopyWithImpl<_$TemplateModelImpl>(this, _$identity);
+  _$$ReplaceFormatImplCopyWith<_$ReplaceFormatImpl> get copyWith =>
+      __$$ReplaceFormatImplCopyWithImpl<_$ReplaceFormatImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TemplateModelImplToJson(
+    return _$$ReplaceFormatImplToJson(
       this,
     );
   }
 }
 
-abstract class _TemplateModel implements TemplateModel {
-  const factory _TemplateModel(
+abstract class _ReplaceFormat implements ReplaceFormat {
+  const factory _ReplaceFormat(
       {required final String templateId,
       required final String templateName,
       required final String thumbnailImage,
       required final ReplaceData replaceData,
-      required final DateTime createdAt}) = _$TemplateModelImpl;
+      required final DateTime createdAt}) = _$ReplaceFormatImpl;
 
-  factory _TemplateModel.fromJson(Map<String, dynamic> json) =
-      _$TemplateModelImpl.fromJson;
+  factory _ReplaceFormat.fromJson(Map<String, dynamic> json) =
+      _$ReplaceFormatImpl.fromJson;
 
   @override
   String get templateId;
@@ -249,6 +249,6 @@ abstract class _TemplateModel implements TemplateModel {
   DateTime get createdAt;
   @override
   @JsonKey(ignore: true)
-  _$$TemplateModelImplCopyWith<_$TemplateModelImpl> get copyWith =>
+  _$$ReplaceFormatImplCopyWith<_$ReplaceFormatImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

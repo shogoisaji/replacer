@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'template_model.dart';
+part of 'replace_format.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$TemplateModelImpl _$$TemplateModelImplFromJson(Map<String, dynamic> json) =>
-    _$TemplateModelImpl(
+_$ReplaceFormatImpl _$$ReplaceFormatImplFromJson(Map<String, dynamic> json) =>
+    _$ReplaceFormatImpl(
       templateId: json['templateId'] as String,
       templateName: json['templateName'] as String,
       thumbnailImage: json['thumbnailImage'] as String,
@@ -16,7 +16,7 @@ _$TemplateModelImpl _$$TemplateModelImplFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
-Map<String, dynamic> _$$TemplateModelImplToJson(_$TemplateModelImpl instance) =>
+Map<String, dynamic> _$$ReplaceFormatImplToJson(_$ReplaceFormatImpl instance) =>
     <String, dynamic>{
       'templateId': instance.templateId,
       'templateName': instance.templateName,
