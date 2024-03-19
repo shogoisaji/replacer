@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,6 +16,12 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             const Text(
               'You have pushed the button this many times:',
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.go('/replace_edit_page');
+              },
+              child: const Text('Replace Edit Page'),
             ),
           ],
         ),
