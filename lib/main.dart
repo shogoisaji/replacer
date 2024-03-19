@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:replacer/pages/home_page.dart';
 import 'package:replacer/repositories/shared_preferences/shared_preferences_repository.dart';
+import 'package:replacer/routes/route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -25,11 +25,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        fontFamily: 'M PLUS Rounded 1c',
-      ),
-      home: const MyHomePage(),
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: myRouter(),
     );
   }
 }
