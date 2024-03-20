@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          context.go('/replace_edit_page');
+                          context.push('/replace_edit_page');
                         },
                         child: Container(
                           margin: const EdgeInsets.only(left: 8),
