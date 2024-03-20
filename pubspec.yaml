@@ -19,6 +19,10 @@ dependencies:
     json_annotation:
     shared_preferences:
     sqflite:
+    font_awesome_flutter:
+    image_picker:
+    image:
+    lottie:
     cupertino_icons: ^1.0.2
 
 dev_dependencies:
@@ -46,3 +50,4 @@ flutter:
 
     assets:
         - assets/images/
+        - assets/lottie/
