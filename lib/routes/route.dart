@@ -4,6 +4,7 @@ import 'package:replacer/pages/export_page.dart';
 import 'package:replacer/pages/format_preview_page.dart';
 import 'package:replacer/pages/home_page.dart';
 import 'package:replacer/pages/replace_edit_page.dart';
+import 'package:replacer/widgets/loading_widget.dart';
 
 class PageConfig {
   final String name;
@@ -20,14 +21,24 @@ List<PageConfig> pages = [
 ];
 
 GoRouter myRouter() {
-  final routes = pages
-      .map((pageConfig) => GoRoute(
-            path: pageConfig.name,
-            builder: (BuildContext context, GoRouterState state) {
-              return pageConfig.page;
-            },
-          ))
-      .toList();
+  final routes = [
+    ShellRoute(
+        builder: (_, __, child) => Scaffold(
+                body: Stack(
+              children: [
+                child,
+                const LoadingWidget(),
+              ],
+            )),
+        routes: pages
+            .map((pageConfig) => GoRoute(
+                  path: pageConfig.name,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return pageConfig.page;
+                  },
+                ))
+            .toList())
+  ];
 
   return GoRouter(
     initialLocation: '/',
