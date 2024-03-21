@@ -30,12 +30,15 @@ class LoadingWidget extends HookConsumerWidget {
               child: Container(
                 color: const Color(MyColors.light),
                 child: Center(
-                  child:
-                      Lottie.asset('assets/lottie/loading.json', controller: lottieController, onLoaded: (composition) {
-                    lottieController
-                      ..duration = composition.duration
-                      ..forward();
-                  }),
+                  child: Lottie.asset(
+                    'assets/lottie/loading.json',
+                    // controller: lottieController, repeat: true,
+                    //     onLoaded: (composition) {
+                    //   lottieController
+                    //     ..duration = composition.duration
+                    //     ..forward();
+                    // }
+                  ),
                 ),
               ),
             ),

@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,6 +38,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     final currentMode = ref.watch(replaceEditStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
     final captureImage = ref.watch(captureScreenStateProvider);
+    final isPicked = ref.watch(replaceEditPageStateProvider).isPicked;
 
     void setGlobalKey() {
       ref.watch(captureScreenKeyStateProvider.notifier).setKey(_clipKey);
@@ -57,6 +59,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = null;
       selectedArea.value = null;
       movePosition.value = Offset.zero;
+      ref.read(replaceEditPageStateProvider.notifier).clear();
       ref.read(captureScreenStateProvider.notifier).clear();
     }
 
@@ -75,8 +78,8 @@ class ReplaceEditPage extends HookConsumerWidget {
       );
     }
 
-    void handlePickImage() {
-      ref.read(imagePickUseCaseProvider).pickImage();
+    void handlePickImage() async {
+      await ref.read(imagePickUseCaseProvider).pickImage();
     }
 
     void handleOnPanUpdate(details) {
@@ -124,28 +127,27 @@ class ReplaceEditPage extends HookConsumerWidget {
       });
     }
 
-    void setPageWidth() {
-      final ReplaceEditPageStateModel model = ReplaceEditPageStateModel(width: w);
-      Future.delayed(Duration.zero, () {
-        ref.read(replaceEditPageStateProvider.notifier).setPageState(model);
-      });
-    }
+    // void setPageWidth() {
+    //   final ReplaceEditPageStateModel model = ReplaceEditPageStateModel(width: w);
+    //   Future.delayed(Duration.zero, () {
+    //     ref.read(replaceEditPageStateProvider.notifier).setPageState(model);
+    //   });
+    // }
 
-    useEffect(() {
-      setPageWidth();
-      return null;
-    }, [w]);
-    useEffect(() {
-      showLoading();
-      return null;
-    }, []);
-    useEffect(() {
-      if (pickImage != null) {
-        showLoading();
-      }
-      temporaryArea.value = const AreaModel();
-      return null;
-    }, [pickImage]);
+    // useEffect(() {
+    //   setPageWidth();
+    //   return null;
+    // }, [w]);
+    // useEffect(() {
+    //   showLoading();
+    //   return null;
+    // }, []);
+    // useEffect(() {
+    //   if (isPicked) {
+    //     showLoading();
+    //   }
+    //   return null;
+    // }, [isPicked]);
 
     return Scaffold(
       backgroundColor: const Color(MyColors.light),
