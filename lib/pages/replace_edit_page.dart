@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:replacer/models/area_model/area_model.dart';
@@ -99,14 +100,14 @@ class ReplaceEditPage extends HookConsumerWidget {
       } else {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
         selectedArea.value = temporaryArea.value;
-        movePosition.value = Offset(
-          temporaryArea.value!.firstPointX > temporaryArea.value!.secondPointX
-              ? temporaryArea.value!.secondPointX
-              : temporaryArea.value!.firstPointX,
-          temporaryArea.value!.firstPointY > temporaryArea.value!.secondPointY
-              ? temporaryArea.value!.secondPointY
-              : temporaryArea.value!.firstPointY,
-        );
+        // movePosition.value = Offset(
+        //   temporaryArea.value!.firstPointX > temporaryArea.value!.secondPointX
+        //       ? temporaryArea.value!.secondPointX
+        //       : temporaryArea.value!.firstPointX,
+        //   temporaryArea.value!.firstPointY > temporaryArea.value!.secondPointY
+        //       ? temporaryArea.value!.secondPointY
+        //       : temporaryArea.value!.firstPointY,
+        // );
 
         /// TODO:delayが必要な理由を解明する
         Future.delayed(const Duration(milliseconds: 300), () {
@@ -146,6 +147,7 @@ class ReplaceEditPage extends HookConsumerWidget {
           IconButton(
               onPressed: () {
                 print('export');
+                context.push('/export_page');
               },
               icon: const FaIcon(
                 FontAwesomeIcons.arrowUpRightFromSquare,
@@ -278,28 +280,15 @@ class ReplaceEditPage extends HookConsumerWidget {
                         );
                       },
                       child: SizedBox(
-                        width: (temporaryArea.value!.secondPointX - temporaryArea.value!.firstPointX).abs(),
-                        height: (temporaryArea.value!.secondPointY - temporaryArea.value!.firstPointY).abs(),
+                        width: w,
+                        height: pickImage.image.height / pickImage.image.width * w,
+                        // width: (temporaryArea.value!.secondPointX - temporaryArea.value!.firstPointX).abs(),
+                        // height: (temporaryArea.value!.secondPointY - temporaryArea.value!.firstPointY).abs(),
                         child: CustomPaint(
                           painter: ImagePainter(captureImage),
                           size: Size(captureImage.width.toDouble() * w / (pickImage!.image.width),
                               captureImage.height.toDouble() * w / (pickImage.image.width)),
                         ),
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
-
-            // 確認用
-            captureImage != null && pickImage != null
-                ? Align(
-                    alignment: Alignment(0, 0.6),
-                    child: Container(
-                      color: Colors.blue.withOpacity(0.2),
-                      width: captureImage.width.toDouble() * w / (pickImage!.image.width),
-                      height: captureImage.height.toDouble() * w / (pickImage.image.width),
-                      child: CustomPaint(
-                        painter: ImagePainter(captureImage),
                       ),
                     ),
                   )
