@@ -6,7 +6,7 @@ part of 'replace_edit_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$replaceEditStateHash() => r'04e8eb79d77835a91161c75fca3a60c0ba812741';
+String _$replaceEditStateHash() => r'5378d835e3374f43975f77631e9ad10f83870826';
 
 /// See also [ReplaceEditState].
 @ProviderFor(ReplaceEditState)

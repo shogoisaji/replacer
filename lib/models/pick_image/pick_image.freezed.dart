@@ -16,8 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$PickImage {
-  XFile? get image => throw _privateConstructorUsedError;
-  Size? get size => throw _privateConstructorUsedError;
+  ui.Image get image => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $PickImageCopyWith<PickImage> get copyWith =>
@@ -29,7 +28,7 @@ abstract class $PickImageCopyWith<$Res> {
   factory $PickImageCopyWith(PickImage value, $Res Function(PickImage) then) =
       _$PickImageCopyWithImpl<$Res, PickImage>;
   @useResult
-  $Res call({XFile? image, Size? size});
+  $Res call({ui.Image image});
 }
 
 /// @nodoc
@@ -45,18 +44,13 @@ class _$PickImageCopyWithImpl<$Res, $Val extends PickImage>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? image = freezed,
-    Object? size = freezed,
+    Object? image = null,
   }) {
     return _then(_value.copyWith(
-      image: freezed == image
+      image: null == image
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
-              as XFile?,
-      size: freezed == size
-          ? _value.size
-          : size // ignore: cast_nullable_to_non_nullable
-              as Size?,
+              as ui.Image,
     ) as $Val);
   }
 }
@@ -69,7 +63,7 @@ abstract class _$$PickImageImplCopyWith<$Res>
       __$$PickImageImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({XFile? image, Size? size});
+  $Res call({ui.Image image});
 }
 
 /// @nodoc
@@ -83,18 +77,13 @@ class __$$PickImageImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? image = freezed,
-    Object? size = freezed,
+    Object? image = null,
   }) {
     return _then(_$PickImageImpl(
-      image: freezed == image
+      image: null == image
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
-              as XFile?,
-      size: freezed == size
-          ? _value.size
-          : size // ignore: cast_nullable_to_non_nullable
-              as Size?,
+              as ui.Image,
     ));
   }
 }
@@ -102,16 +91,14 @@ class __$$PickImageImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$PickImageImpl implements _PickImage {
-  const _$PickImageImpl({this.image, this.size});
+  const _$PickImageImpl({required this.image});
 
   @override
-  final XFile? image;
-  @override
-  final Size? size;
+  final ui.Image image;
 
   @override
   String toString() {
-    return 'PickImage(image: $image, size: $size)';
+    return 'PickImage(image: $image)';
   }
 
   @override
@@ -119,12 +106,11 @@ class _$PickImageImpl implements _PickImage {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$PickImageImpl &&
-            (identical(other.image, image) || other.image == image) &&
-            (identical(other.size, size) || other.size == size));
+            (identical(other.image, image) || other.image == image));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, image, size);
+  int get hashCode => Object.hash(runtimeType, image);
 
   @JsonKey(ignore: true)
   @override
@@ -134,13 +120,10 @@ class _$PickImageImpl implements _PickImage {
 }
 
 abstract class _PickImage implements PickImage {
-  const factory _PickImage({final XFile? image, final Size? size}) =
-      _$PickImageImpl;
+  const factory _PickImage({required final ui.Image image}) = _$PickImageImpl;
 
   @override
-  XFile? get image;
-  @override
-  Size? get size;
+  ui.Image get image;
   @override
   @JsonKey(ignore: true)
   _$$PickImageImplCopyWith<_$PickImageImpl> get copyWith =>
