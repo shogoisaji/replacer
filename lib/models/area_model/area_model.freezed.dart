@@ -138,21 +138,25 @@ class __$$AreaModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$AreaModelImpl implements _AreaModel {
   const _$AreaModelImpl(
-      {required this.firstPointX,
-      required this.firstPointY,
-      required this.secondPointX,
-      required this.secondPointY});
+      {this.firstPointX = 0.0,
+      this.firstPointY = 0.0,
+      this.secondPointX = 0.0,
+      this.secondPointY = 0.0});
 
   factory _$AreaModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$AreaModelImplFromJson(json);
 
   @override
+  @JsonKey()
   final double firstPointX;
   @override
+  @JsonKey()
   final double firstPointY;
   @override
+  @JsonKey()
   final double secondPointX;
   @override
+  @JsonKey()
   final double secondPointY;
 
   @override
@@ -196,10 +200,10 @@ class _$AreaModelImpl implements _AreaModel {
 
 abstract class _AreaModel implements AreaModel {
   const factory _AreaModel(
-      {required final double firstPointX,
-      required final double firstPointY,
-      required final double secondPointX,
-      required final double secondPointY}) = _$AreaModelImpl;
+      {final double firstPointX,
+      final double firstPointY,
+      final double secondPointX,
+      final double secondPointY}) = _$AreaModelImpl;
 
   factory _AreaModel.fromJson(Map<String, dynamic> json) =
       _$AreaModelImpl.fromJson;

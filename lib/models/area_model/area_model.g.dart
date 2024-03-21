@@ -8,10 +8,10 @@ part of 'area_model.dart';
 
 _$AreaModelImpl _$$AreaModelImplFromJson(Map<String, dynamic> json) =>
     _$AreaModelImpl(
-      firstPointX: (json['firstPointX'] as num).toDouble(),
-      firstPointY: (json['firstPointY'] as num).toDouble(),
-      secondPointX: (json['secondPointX'] as num).toDouble(),
-      secondPointY: (json['secondPointY'] as num).toDouble(),
+      firstPointX: (json['firstPointX'] as num?)?.toDouble() ?? 0.0,
+      firstPointY: (json['firstPointY'] as num?)?.toDouble() ?? 0.0,
+      secondPointX: (json['secondPointX'] as num?)?.toDouble() ?? 0.0,
+      secondPointY: (json['secondPointY'] as num?)?.toDouble() ?? 0.0,
     );
 
 Map<String, dynamic> _$$AreaModelImplToJson(_$AreaModelImpl instance) =>
