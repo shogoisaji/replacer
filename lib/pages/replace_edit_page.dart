@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,23 +24,23 @@ import 'package:replacer/widgets/capture_widget.dart';
 class ReplaceEditPage extends HookConsumerWidget {
   const ReplaceEditPage({super.key});
 
-  static final GlobalKey _clipKey = GlobalKey();
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final w = MediaQuery.sizeOf(context).width;
     final temporaryFirstPoint = useState<Offset?>(null);
     final movePosition = useState<Offset>(Offset.zero);
     final temporaryArea = useState<AreaModel?>(null);
     final selectedArea = useState<AreaModel?>(null);
-    final w = MediaQuery.sizeOf(context).width;
     final lottieController = useAnimationController(duration: const Duration(milliseconds: 2000), initialValue: 1);
     final currentMode = ref.watch(replaceEditStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
     final captureImage = ref.watch(captureScreenStateProvider);
-    final isPicked = ref.watch(replaceEditPageStateProvider).isPicked;
+    final clipKey = ref.watch(captureScreenKeyStateProvider);
 
     void setGlobalKey() {
-      ref.watch(captureScreenKeyStateProvider.notifier).setKey(_clipKey);
+      final GlobalKey key = GlobalKey();
+
+      ref.watch(captureScreenKeyStateProvider.notifier).setKey(key);
     }
 
     useEffect(() {
@@ -59,6 +58,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = null;
       selectedArea.value = null;
       movePosition.value = Offset.zero;
+      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(replaceEditPageStateProvider.notifier).clear();
       ref.read(captureScreenStateProvider.notifier).clear();
     }
@@ -80,6 +80,7 @@ class ReplaceEditPage extends HookConsumerWidget {
 
     void handlePickImage() async {
       await ref.read(imagePickUseCaseProvider).pickImage();
+      resetArea();
     }
 
     void handleOnPanUpdate(details) {
@@ -118,36 +119,14 @@ class ReplaceEditPage extends HookConsumerWidget {
       ref.read(backHomeUseCase).backHome(context);
     }
 
-    void showLoading() {
-      Future.delayed(const Duration(seconds: 0), () {
-        ref.read(loadingStateProvider.notifier).show();
-      });
-      Future.delayed(const Duration(seconds: 1), () {
-        ref.read(loadingStateProvider.notifier).hide();
-      });
-    }
-
-    // void setPageWidth() {
-    //   final ReplaceEditPageStateModel model = ReplaceEditPageStateModel(width: w);
-    //   Future.delayed(Duration.zero, () {
-    //     ref.read(replaceEditPageStateProvider.notifier).setPageState(model);
+    // void showLoading() {
+    //   Future.delayed(const Duration(seconds: 0), () {
+    //     ref.read(loadingStateProvider.notifier).show();
+    //   });
+    //   Future.delayed(const Duration(seconds: 1), () {
+    //     ref.read(loadingStateProvider.notifier).hide();
     //   });
     // }
-
-    // useEffect(() {
-    //   setPageWidth();
-    //   return null;
-    // }, [w]);
-    // useEffect(() {
-    //   showLoading();
-    //   return null;
-    // }, []);
-    // useEffect(() {
-    //   if (isPicked) {
-    //     showLoading();
-    //   }
-    //   return null;
-    // }, [isPicked]);
 
     return Scaffold(
       backgroundColor: const Color(MyColors.light),
@@ -202,15 +181,13 @@ class ReplaceEditPage extends HookConsumerWidget {
                 width: w,
                 height: imageArea.dy,
                 color: Colors.transparent,
-                // decoration: BoxDecoration(border: Border.all(color: Colors.red, width: 2) //確認用,
-                //     ),
               ),
             ),
 
             /// selected area
-            selectedArea.value != null
+            selectedArea.value != null && clipKey != null
                 ? CaptureWidget(
-                    clipKey: _clipKey,
+                    clipKey: clipKey,
                     area: selectedArea.value ?? const AreaModel(),
                     color: Colors.red,
                   )
@@ -288,7 +265,7 @@ class ReplaceEditPage extends HookConsumerWidget {
             ),
 
             //// キャプチャした画像 move select mode
-            captureImage != null
+            captureImage != null && pickImage != null
                 ? Positioned(
                     top: movePosition.value.dy,
                     left: movePosition.value.dx,
@@ -314,7 +291,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                 : const SizedBox(),
 
             // 確認用
-            captureImage != null
+            captureImage != null && pickImage != null
                 ? Align(
                     alignment: Alignment(0, 0.6),
                     child: Container(
