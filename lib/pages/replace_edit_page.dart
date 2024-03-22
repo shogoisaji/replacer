@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import 'package:lottie/lottie.dart';
 import 'package:replacer/models/area_model/area_model.dart';
 import 'package:replacer/models/move_delta/move_delta.dart';
 import 'package:replacer/models/replace_data/replace_data.dart';
-import 'package:replacer/states/capture_screen_key_state.dart';
 import 'package:replacer/states/capture_screen_state.dart';
 import 'package:replacer/states/image_pick_state.dart';
 import 'package:replacer/states/replace_edit_page_state.dart';
@@ -20,6 +20,7 @@ import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/back_home_usecase.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
+import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/area_select_widget.dart';
 import 'package:replacer/widgets/capture_widget.dart';
 
@@ -37,34 +38,44 @@ class ReplaceEditPage extends HookConsumerWidget {
     final currentMode = ref.watch(replaceEditStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
     final captureImage = ref.watch(captureScreenStateProvider);
-    final clipKey = ref.watch(captureScreenKeyStateProvider);
     final replaceFormatData = ref.watch(replaceFormatStateProvider);
+    final replaceListThumbnail = useState<List<Uint8List>>([]);
 
-    void setGlobalKey() {
-      final GlobalKey key = GlobalKey();
+    // void setGlobalKey() {
+    //   final GlobalKey key = GlobalKey();
 
-      ref.watch(captureScreenKeyStateProvider.notifier).setKey(key);
-    }
+    //   ref.watch(captureScreenKeyStateProvider.notifier).setKey(key);
+    // }
 
-    useEffect(() {
-      Future.delayed(Duration.zero, () {
-        setGlobalKey();
-      });
-      return;
-    }, [currentMode]);
+    // useEffect(() {
+    //   Future.delayed(Duration.zero, () {
+    //     setGlobalKey();
+    //   });
+    //   return;
+    // }, [currentMode]);
 
     final Offset imageArea =
         pickImage != null ? Offset(w, pickImage.image.height / pickImage.image.width * w) : Offset.zero;
 
-    void resetArea() {
+    void resetToNextArea() {
       temporaryFirstPoint.value = null;
       temporaryArea.value = null;
       selectedArea.value = null;
       movePosition.value = Offset.zero;
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
+      ref.read(captureScreenStateProvider.notifier).clear();
+    }
+
+    void resetAll() {
+      temporaryFirstPoint.value = null;
+      temporaryArea.value = null;
+      selectedArea.value = null;
+      movePosition.value = Offset.zero;
+      replaceListThumbnail.value = [];
+      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(replaceEditPageStateProvider.notifier).clear();
       ref.read(captureScreenStateProvider.notifier).clear();
-      ref.read(replaceFormatStateProvider.notifier).formatInit();
+      ref.read(replaceFormatStateProvider.notifier).replaceDataReset();
     }
 
     void handleFirstTapImage(details) {
@@ -84,7 +95,7 @@ class ReplaceEditPage extends HookConsumerWidget {
 
     void handlePickImage() async {
       await ref.read(imagePickUseCaseProvider).pickImage();
-      resetArea();
+      resetAll();
     }
 
     void handleOnPanUpdate(details) {
@@ -99,7 +110,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     void handleChangeMode() {
       if (currentMode == ReplaceEditMode.moveSelect) {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
-        resetArea();
+        resetToNextArea();
       } else {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
         selectedArea.value = temporaryArea.value;
@@ -113,7 +124,7 @@ class ReplaceEditPage extends HookConsumerWidget {
         );
 
         /// TODO:delayが必要な理由を解明する
-        Future.delayed(const Duration(milliseconds: 300), () {
+        Future.delayed(const Duration(milliseconds: 0), () {
           if (pickImage == null) return;
           final sizeConvertRate = pickImage.image.width / w;
           final Rect rect = Rect.fromPoints(
@@ -129,7 +140,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       }
     }
 
-    void handleSelectMove() {
+    Future<void> handleSelectMove() async {
       if (movePosition.value == Offset.zero) {
         print('not move');
         return;
@@ -138,13 +149,20 @@ class ReplaceEditPage extends HookConsumerWidget {
         print('not selected area');
         return;
       }
-      final replaceDataId = replaceFormatData == null ? '1' : (replaceFormatData.replaceDataList.length + 1).toString();
+
+      if (captureImage == null) return;
+      final convertedThumbnail = await ThumbnailResizeUint8ListConverter().convertThumbnail(captureImage, 100, 100);
+      replaceListThumbnail.value.add(convertedThumbnail);
+
+      ///TODO
+      final replaceDataId = (replaceFormatData.replaceDataList.length + 1).toString();
       final addData = ReplaceData(
           replaceDataId: replaceDataId,
           area: selectedArea.value!,
           moveDelta: MoveDelta(dx: movePosition.value.dx, dy: movePosition.value.dy));
       print('addData $addData');
       ref.read(replaceFormatStateProvider.notifier).addReplaceData(addData);
+      resetToNextArea();
     }
 
     void backHome(BuildContext context) {
@@ -220,9 +238,8 @@ class ReplaceEditPage extends HookConsumerWidget {
             ),
 
             /// selected area
-            selectedArea.value != null && clipKey != null
+            selectedArea.value != null
                 ? CaptureWidget(
-                    clipKey: clipKey,
                     area: selectedArea.value ?? const AreaModel(),
                     color: Colors.red,
                   )
@@ -241,7 +258,7 @@ class ReplaceEditPage extends HookConsumerWidget {
             ),
 
             //// キャプチャした画像 move select mode
-            captureImage != null && pickImage != null
+            captureImage != null && pickImage != null && selectedArea.value != null
                 ? Positioned(
                     top: movePosition.value.dy,
                     left: movePosition.value.dx,
@@ -271,8 +288,11 @@ class ReplaceEditPage extends HookConsumerWidget {
             Positioned(
               bottom: 100,
               left: 0,
-              child:
-                  SizedBox(width: w, height: 150, child: MoveSelectListView(list: replaceFormatData?.replaceDataList)),
+              child: SizedBox(
+                  width: w,
+                  height: 150,
+                  child: MoveSelectListView(
+                      list: replaceFormatData.replaceDataList, thumbnailList: replaceListThumbnail.value)),
             ),
 
             /// 右下のプラスボタン
@@ -370,76 +390,78 @@ class ImagePainter extends CustomPainter {
 }
 
 class MoveSelectListView extends StatelessWidget {
-  final List<ReplaceData?>? list;
-  const MoveSelectListView({super.key, required this.list});
+  final List<ReplaceData?> list;
+  final List<Uint8List> thumbnailList;
+  const MoveSelectListView({super.key, required this.list, required this.thumbnailList});
+
+  static const double _height = 70;
 
   @override
   Widget build(BuildContext context) {
-    return list != null
-        ? ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            scrollDirection: Axis.horizontal,
-            itemCount: list!.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  print('tapped');
-                },
-                child: Align(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(MyColors.orange1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Text((list![index]!.replaceDataId).toString()),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                print('delete');
-                              },
-                              child: Container(
-                                height: 70,
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const FaIcon(
-                                  FontAwesomeIcons.trash,
-                                  color: Color(MyColors.orange1),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const FaIcon(
-                                FontAwesomeIcons.trash,
-                                color: Color(MyColors.orange1),
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          )
-        : const SizedBox();
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      scrollDirection: Axis.horizontal,
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            print('tapped');
+          },
+          child: Align(
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: const Color(MyColors.orange1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Text((list![index]!.replaceDataId).toString()),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          print('delete');
+                        },
+                        child: Container(
+                          height: _height,
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: const Color(MyColors.light),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const FaIcon(
+                            FontAwesomeIcons.trash,
+                            color: Color(MyColors.orange1),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: _height,
+                        height: _height,
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: const Color(MyColors.light),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: thumbnailList.length > index
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(6), child: Image.memory(thumbnailList[index]))
+                            : const SizedBox(),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

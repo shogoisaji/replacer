@@ -11,12 +11,10 @@ import 'package:replacer/states/image_pick_state.dart';
 class CaptureWidget extends HookConsumerWidget {
   final AreaModel area;
   final Color color;
-  final GlobalKey clipKey;
   const CaptureWidget({
     Key? key,
     required this.area,
     required this.color,
-    required this.clipKey,
   }) : super(key: key);
 
   @override
@@ -28,13 +26,10 @@ class CaptureWidget extends HookConsumerWidget {
         ? SizedBox(
             width: w,
             height: w * (pickImage.image.height / pickImage.image.width),
-            child: RepaintBoundary(
-              key: clipKey,
-              child: CustomPaint(
-                painter: ClipPainter(
-                  area: area,
-                  image: pickImage.image,
-                ),
+            child: CustomPaint(
+              painter: ClipPainter(
+                area: area,
+                image: pickImage.image,
               ),
             ),
           )

@@ -9,7 +9,7 @@ class CaptureScreenState extends _$CaptureScreenState {
   @override
   ui.Image? build() => null;
 
-  void setCaptureScreen(ui.Image image) => state = image;
+  // void setCaptureScreen(ui.Image image) => state = image;
 
   void clear() => state = null;
 

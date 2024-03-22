@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+// import 'package:flutter/material.dart';
+// import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'capture_screen_key_state.g.dart';
+// part 'capture_screen_key_state.g.dart';
 
-@Riverpod(keepAlive: true)
-class CaptureScreenKeyState extends _$CaptureScreenKeyState {
-  @override
-  GlobalKey? build() => null;
+// @Riverpod(keepAlive: true)
+// class CaptureScreenKeyState extends _$CaptureScreenKeyState {
+//   @override
+//   GlobalKey? build() => null;
 
-  void setKey(GlobalKey key) => state = key;
+//   void setKey(GlobalKey key) => state = key;
 
-  void clear() => state = null;
-}
+//   void clear() => state = null;
+// }
