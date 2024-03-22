@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'capture_area_screen_usecase.dart';
+part of 'replace_thumbnail_state.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$captureAreaScreenUseCaseHash() =>
-    r'7d19e589797f6cd4effc2478f27d9ad7a46c2b76';
+String _$replaceThumbnailStateHash() =>
+    r'8e42c611e9a9476cf30a113fa361b35b8618d99d';
 
-/// See also [captureAreaScreenUseCase].
-@ProviderFor(captureAreaScreenUseCase)
-final captureAreaScreenUseCaseProvider = FutureProvider<void>.internal(
-  captureAreaScreenUseCase,
-  name: r'captureAreaScreenUseCaseProvider',
+/// See also [ReplaceThumbnailState].
+@ProviderFor(ReplaceThumbnailState)
+final replaceThumbnailStateProvider = AutoDisposeNotifierProvider<
+    ReplaceThumbnailState, List<Uint8List>>.internal(
+  ReplaceThumbnailState.new,
+  name: r'replaceThumbnailStateProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$captureAreaScreenUseCaseHash,
+      : _$replaceThumbnailStateHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef CaptureAreaScreenUseCaseRef = FutureProviderRef<void>;
+typedef _$ReplaceThumbnailState = AutoDisposeNotifier<List<Uint8List>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

@@ -11,8 +11,9 @@ _$ReplaceFormatImpl _$$ReplaceFormatImplFromJson(Map<String, dynamic> json) =>
       templateId: json['templateId'] as String,
       templateName: json['templateName'] as String,
       thumbnailImage: json['thumbnailImage'] as String,
-      replaceData:
-          ReplaceData.fromJson(json['replaceData'] as Map<String, dynamic>),
+      replaceDataList: (json['replaceDataList'] as List<dynamic>)
+          .map((e) => ReplaceData.fromJson(e as Map<String, dynamic>))
+          .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
@@ -21,6 +22,6 @@ Map<String, dynamic> _$$ReplaceFormatImplToJson(_$ReplaceFormatImpl instance) =>
       'templateId': instance.templateId,
       'templateName': instance.templateName,
       'thumbnailImage': instance.thumbnailImage,
-      'replaceData': instance.replaceData,
+      'replaceDataList': instance.replaceDataList,
       'createdAt': instance.createdAt.toIso8601String(),
     };
