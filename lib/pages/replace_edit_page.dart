@@ -13,14 +13,12 @@ import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/states/capture_screen_key_state.dart';
 import 'package:replacer/states/capture_screen_state.dart';
 import 'package:replacer/states/image_pick_state.dart';
-import 'package:replacer/states/loading_state.dart';
 import 'package:replacer/states/replace_edit_page_state.dart';
 import 'package:replacer/states/replace_edit_state.dart';
 import 'package:replacer/states/replace_format_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/back_home_usecase.dart';
-import 'package:replacer/use_case/capture_area_screen_usecase.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
 import 'package:replacer/widgets/area_select_widget.dart';
 import 'package:replacer/widgets/capture_widget.dart';
@@ -105,18 +103,28 @@ class ReplaceEditPage extends HookConsumerWidget {
       } else {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
         selectedArea.value = temporaryArea.value;
-        // movePosition.value = Offset(
-        //   temporaryArea.value!.firstPointX > temporaryArea.value!.secondPointX
-        //       ? temporaryArea.value!.secondPointX
-        //       : temporaryArea.value!.firstPointX,
-        //   temporaryArea.value!.firstPointY > temporaryArea.value!.secondPointY
-        //       ? temporaryArea.value!.secondPointY
-        //       : temporaryArea.value!.firstPointY,
-        // );
+        movePosition.value = Offset(
+          temporaryArea.value!.firstPointX > temporaryArea.value!.secondPointX
+              ? temporaryArea.value!.secondPointX
+              : temporaryArea.value!.firstPointX,
+          temporaryArea.value!.firstPointY > temporaryArea.value!.secondPointY
+              ? temporaryArea.value!.secondPointY
+              : temporaryArea.value!.firstPointY,
+        );
 
         /// TODO:delayが必要な理由を解明する
         Future.delayed(const Duration(milliseconds: 300), () {
-          ref.read(captureAreaScreenUseCaseProvider);
+          if (pickImage == null) return;
+          final sizeConvertRate = pickImage.image.width / w;
+          final Rect rect = Rect.fromPoints(
+              Offset(
+                  selectedArea.value!.firstPointX * sizeConvertRate, selectedArea.value!.firstPointY * sizeConvertRate),
+              Offset(selectedArea.value!.secondPointX * sizeConvertRate,
+                  selectedArea.value!.secondPointY * sizeConvertRate));
+          print('clipImagX ${selectedArea.value!.firstPointX} , ${selectedArea.value!.firstPointY}');
+          print('clipImagY ${selectedArea.value!.secondPointX} , ${selectedArea.value!.secondPointY}');
+          print('clipImagC $rect');
+          ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
         });
       }
     }
@@ -245,15 +253,16 @@ class ReplaceEditPage extends HookConsumerWidget {
                           movePosition.value.dy + details.delta.dy,
                         );
                       },
-                      child: SizedBox(
-                        width: w,
-                        height: pickImage.image.height / pickImage.image.width * w,
+                      child: Container(
+                        color: Colors.blue.withOpacity(0.5),
+                        width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs(),
+                        height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs(),
                         // width: (temporaryArea.value!.secondPointX - temporaryArea.value!.firstPointX).abs(),
                         // height: (temporaryArea.value!.secondPointY - temporaryArea.value!.firstPointY).abs(),
                         child: CustomPaint(
                           painter: ImagePainter(captureImage),
-                          size: Size(captureImage.width.toDouble() * w / (pickImage.image.width),
-                              captureImage.height.toDouble() * w / (pickImage.image.width)),
+                          // size: Size(captureImage.width.toDouble() * w / (pickImage.image.width),
+                          //     captureImage.height.toDouble() * w / (pickImage.image.width)),
                         ),
                       ),
                     ),
