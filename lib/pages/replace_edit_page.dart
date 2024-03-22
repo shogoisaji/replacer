@@ -189,9 +189,11 @@ class ReplaceEditPage extends HookConsumerWidget {
                     child: SizedBox(
                       width: w,
                       height: pickImage.image.height / pickImage.image.width * w,
-                      child: CustomPaint(
-                        painter: ImagePainter(pickImage.image),
-                        // size: Size(pickImage.image.width.toDouble(), pickImage.image.height.toDouble()),
+                      child: RepaintBoundary(
+                        child: CustomPaint(
+                          painter: ImagePainter(pickImage.image),
+                          // size: Size(pickImage.image.width.toDouble(), pickImage.image.height.toDouble()),
+                        ),
                       ),
                     ),
                   ),
@@ -250,7 +252,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                         // height: (temporaryArea.value!.secondPointY - temporaryArea.value!.firstPointY).abs(),
                         child: CustomPaint(
                           painter: ImagePainter(captureImage),
-                          size: Size(captureImage.width.toDouble() * w / (pickImage!.image.width),
+                          size: Size(captureImage.width.toDouble() * w / (pickImage.image.width),
                               captureImage.height.toDouble() * w / (pickImage.image.width)),
                         ),
                       ),
@@ -261,7 +263,7 @@ class ReplaceEditPage extends HookConsumerWidget {
               bottom: 100,
               left: 0,
               child:
-                  SizedBox(width: w, height: 100, child: MoveSelectListView(list: replaceFormatData?.replaceDataList)),
+                  SizedBox(width: w, height: 150, child: MoveSelectListView(list: replaceFormatData?.replaceDataList)),
             ),
 
             /// 右下のプラスボタン
@@ -354,7 +356,7 @@ class ImagePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+    return false;
   }
 }
 
@@ -366,6 +368,7 @@ class MoveSelectListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return list != null
         ? ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             scrollDirection: Axis.horizontal,
             itemCount: list!.length,
             itemBuilder: (context, index) {
@@ -373,14 +376,57 @@ class MoveSelectListView extends StatelessWidget {
                 onTap: () {
                   print('tapped');
                 },
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade200,
-                    borderRadius: BorderRadius.circular(10),
+                child: Align(
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(MyColors.orange1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Text((list![index]!.replaceDataId).toString()),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                print('delete');
+                              },
+                              child: Container(
+                                height: 70,
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const FaIcon(
+                                  FontAwesomeIcons.trash,
+                                  color: Color(MyColors.orange1),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 70,
+                              height: 70,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const FaIcon(
+                                FontAwesomeIcons.trash,
+                                color: Color(MyColors.orange1),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
-                  child: Text((list![index]!.replaceDataId).toString()),
                 ),
               );
             },

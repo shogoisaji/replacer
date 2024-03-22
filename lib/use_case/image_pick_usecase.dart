@@ -19,8 +19,8 @@ class ImagePickUseCase {
   Future<bool> pickImage() async {
     try {
       final XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      ref.read(loadingStateProvider.notifier).show();
       if (image == null) return false;
+      ref.read(loadingStateProvider.notifier).show();
       final ui.Image? convertedImage = await ImageConverter().convertXFileToImage(image);
       if (convertedImage == null) return false;
       ref.read(pickImageStateProvider.notifier).setPickImage(convertedImage);
