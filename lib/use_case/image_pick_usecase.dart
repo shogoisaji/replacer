@@ -24,7 +24,6 @@ class ImagePickUseCase {
       if (convertedImage == null) return false;
       ref.read(pickImageStateProvider.notifier).setPickImage(convertedImage);
       ref.read(loadingStateProvider.notifier).hide();
-
       return true;
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');

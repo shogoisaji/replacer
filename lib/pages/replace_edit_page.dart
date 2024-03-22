@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -19,7 +18,6 @@ import 'package:replacer/states/replace_format_state.dart';
 import 'package:replacer/states/replace_thumbnail_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
-import 'package:replacer/use_case/back_home_usecase.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
 import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/area_select_widget.dart';
@@ -40,20 +38,6 @@ class ReplaceEditPage extends HookConsumerWidget {
     final pickImage = ref.watch(pickImageStateProvider);
     final captureImage = ref.watch(captureScreenStateProvider);
     final replaceFormatData = ref.watch(replaceFormatStateProvider);
-    // final replaceListThumbnail = useState<List<Uint8List>>([]);
-
-    // void setGlobalKey() {
-    //   final GlobalKey key = GlobalKey();
-
-    //   ref.watch(captureScreenKeyStateProvider.notifier).setKey(key);
-    // }
-
-    // useEffect(() {
-    //   Future.delayed(Duration.zero, () {
-    //     setGlobalKey();
-    //   });
-    //   return;
-    // }, [currentMode]);
 
     final Offset imageArea =
         pickImage != null ? Offset(w, pickImage.image.height / pickImage.image.width * w) : Offset.zero;
@@ -95,7 +79,8 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     void handlePickImage() async {
-      await ref.read(imagePickUseCaseProvider).pickImage();
+      final result = await ref.read(imagePickUseCaseProvider).pickImage();
+      if (!result) return;
       resetAll();
     }
 
@@ -124,24 +109,19 @@ class ReplaceEditPage extends HookConsumerWidget {
               : temporaryArea.value!.firstPointY,
         );
 
-        /// TODO:delayが必要な理由を解明する
-        Future.delayed(const Duration(milliseconds: 0), () {
-          if (pickImage == null) return;
-          final sizeConvertRate = pickImage.image.width / w;
-          final Rect rect = Rect.fromPoints(
-              Offset(
-                  selectedArea.value!.firstPointX * sizeConvertRate, selectedArea.value!.firstPointY * sizeConvertRate),
-              Offset(selectedArea.value!.secondPointX * sizeConvertRate,
-                  selectedArea.value!.secondPointY * sizeConvertRate));
-          print('clipImagX ${selectedArea.value!.firstPointX} , ${selectedArea.value!.firstPointY}');
-          print('clipImagY ${selectedArea.value!.secondPointX} , ${selectedArea.value!.secondPointY}');
-          print('clipImagC $rect');
-          ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
-        });
+        if (pickImage == null) return;
+        final sizeConvertRate = pickImage.image.width / w;
+        final Rect rect = Rect.fromPoints(
+            Offset(
+                selectedArea.value!.firstPointX * sizeConvertRate, selectedArea.value!.firstPointY * sizeConvertRate),
+            Offset(selectedArea.value!.secondPointX * sizeConvertRate,
+                selectedArea.value!.secondPointY * sizeConvertRate));
+
+        ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
       }
     }
 
-    Future<void> handleSelectMove() async {
+    Future<void> handleSelectMoved() async {
       if (movePosition.value == Offset.zero) {
         print('not move');
         return;
@@ -155,29 +135,20 @@ class ReplaceEditPage extends HookConsumerWidget {
       final convertedThumbnail = await ThumbnailResizeUint8ListConverter().convertThumbnail(captureImage, 100, 100);
       ref.read(replaceThumbnailStateProvider.notifier).addThumbnail(convertedThumbnail);
 
-      ///TODO
       final replaceDataId = (replaceFormatData.replaceDataList.length + 1).toString();
       final addData = ReplaceData(
           replaceDataId: replaceDataId,
           area: selectedArea.value!,
           moveDelta: MoveDelta(dx: movePosition.value.dx, dy: movePosition.value.dy));
-      print('addData $addData');
+
       ref.read(replaceFormatStateProvider.notifier).addReplaceData(addData);
       resetToNextArea();
     }
 
     void backHome(BuildContext context) {
-      ref.read(backHomeUseCase).backHome(context);
+      resetAll();
+      context.go('/');
     }
-
-    // void showLoading() {
-    //   Future.delayed(const Duration(seconds: 0), () {
-    //     ref.read(loadingStateProvider.notifier).show();
-    //   });
-    //   Future.delayed(const Duration(seconds: 1), () {
-    //     ref.read(loadingStateProvider.notifier).hide();
-    //   });
-    // }
 
     return Scaffold(
       backgroundColor: const Color(MyColors.light),
@@ -350,7 +321,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                     const SizedBox(width: 24),
                     IconButton(
                         onPressed: () {
-                          handleSelectMove();
+                          handleSelectMoved();
                         },
                         icon: const FaIcon(
                           FontAwesomeIcons.check,
