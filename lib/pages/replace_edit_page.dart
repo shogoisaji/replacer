@@ -16,6 +16,7 @@ import 'package:replacer/states/image_pick_state.dart';
 import 'package:replacer/states/replace_edit_page_state.dart';
 import 'package:replacer/states/replace_edit_state.dart';
 import 'package:replacer/states/replace_format_state.dart';
+import 'package:replacer/states/replace_thumbnail_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/back_home_usecase.dart';
@@ -39,7 +40,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     final pickImage = ref.watch(pickImageStateProvider);
     final captureImage = ref.watch(captureScreenStateProvider);
     final replaceFormatData = ref.watch(replaceFormatStateProvider);
-    final replaceListThumbnail = useState<List<Uint8List>>([]);
+    // final replaceListThumbnail = useState<List<Uint8List>>([]);
 
     // void setGlobalKey() {
     //   final GlobalKey key = GlobalKey();
@@ -71,7 +72,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = null;
       selectedArea.value = null;
       movePosition.value = Offset.zero;
-      replaceListThumbnail.value = [];
+      ref.read(replaceThumbnailStateProvider.notifier).clear();
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(replaceEditPageStateProvider.notifier).clear();
       ref.read(captureScreenStateProvider.notifier).clear();
@@ -152,7 +153,7 @@ class ReplaceEditPage extends HookConsumerWidget {
 
       if (captureImage == null) return;
       final convertedThumbnail = await ThumbnailResizeUint8ListConverter().convertThumbnail(captureImage, 100, 100);
-      replaceListThumbnail.value.add(convertedThumbnail);
+      ref.read(replaceThumbnailStateProvider.notifier).addThumbnail(convertedThumbnail);
 
       ///TODO
       final replaceDataId = (replaceFormatData.replaceDataList.length + 1).toString();
@@ -288,11 +289,8 @@ class ReplaceEditPage extends HookConsumerWidget {
             Positioned(
               bottom: 100,
               left: 0,
-              child: SizedBox(
-                  width: w,
-                  height: 150,
-                  child: MoveSelectListView(
-                      list: replaceFormatData.replaceDataList, thumbnailList: replaceListThumbnail.value)),
+              child:
+                  SizedBox(width: w, height: 150, child: MoveSelectListView(list: replaceFormatData.replaceDataList)),
             ),
 
             /// 右下のプラスボタン
@@ -389,15 +387,21 @@ class ImagePainter extends CustomPainter {
   }
 }
 
-class MoveSelectListView extends StatelessWidget {
+class MoveSelectListView extends ConsumerWidget {
   final List<ReplaceData?> list;
-  final List<Uint8List> thumbnailList;
-  const MoveSelectListView({super.key, required this.list, required this.thumbnailList});
+  const MoveSelectListView({super.key, required this.list});
 
   static const double _height = 70;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final thumbnailList = ref.watch(replaceThumbnailStateProvider);
+
+    void handleDelete(int index) {
+      ref.read(replaceFormatStateProvider.notifier).removeReplaceData(index);
+      ref.read(replaceThumbnailStateProvider.notifier).removeThumbnail(index);
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       scrollDirection: Axis.horizontal,
@@ -418,13 +422,12 @@ class MoveSelectListView extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Text((list![index]!.replaceDataId).toString()),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
                         onTap: () {
-                          print('delete');
+                          handleDelete(index);
                         },
                         child: Container(
                           height: _height,
@@ -450,8 +453,13 @@ class MoveSelectListView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: thumbnailList.length > index
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(6), child: Image.memory(thumbnailList[index]))
+                            ? GestureDetector(
+                                onTap: () {
+                                  print('tapped $index');
+                                },
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(6), child: Image.memory(thumbnailList[index])),
+                              )
                             : const SizedBox(),
                       ),
                     ],

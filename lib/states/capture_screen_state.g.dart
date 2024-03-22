@@ -7,7 +7,7 @@ part of 'capture_screen_state.dart';
 // **************************************************************************
 
 String _$captureScreenStateHash() =>
-    r'99271ca8c78c39806a9a3c855d12961f9f4783ff';
+    r'42c5beda2a10d594acef4e568048faf20ec76455';
 
 /// See also [CaptureScreenState].
 @ProviderFor(CaptureScreenState)

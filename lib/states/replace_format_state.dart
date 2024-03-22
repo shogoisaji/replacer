@@ -32,4 +32,14 @@ class ReplaceFormatState extends _$ReplaceFormatState {
       createdAt: state.createdAt,
     );
   }
+
+  void removeReplaceData(int index) {
+    state = ReplaceFormat(
+      templateId: state.templateId,
+      templateName: state.templateName,
+      thumbnailImage: state.thumbnailImage,
+      replaceDataList: List.from(state.replaceDataList)..removeAt(index),
+      createdAt: state.createdAt,
+    );
+  }
 }
