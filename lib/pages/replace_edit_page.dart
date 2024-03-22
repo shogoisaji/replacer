@@ -8,12 +8,15 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:replacer/models/area_model/area_model.dart';
+import 'package:replacer/models/move_delta/move_delta.dart';
+import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/states/capture_screen_key_state.dart';
 import 'package:replacer/states/capture_screen_state.dart';
 import 'package:replacer/states/image_pick_state.dart';
 import 'package:replacer/states/loading_state.dart';
 import 'package:replacer/states/replace_edit_page_state.dart';
 import 'package:replacer/states/replace_edit_state.dart';
+import 'package:replacer/states/replace_format_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/back_home_usecase.dart';
@@ -37,6 +40,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     final pickImage = ref.watch(pickImageStateProvider);
     final captureImage = ref.watch(captureScreenStateProvider);
     final clipKey = ref.watch(captureScreenKeyStateProvider);
+    final replaceFormatData = ref.watch(replaceFormatStateProvider);
 
     void setGlobalKey() {
       final GlobalKey key = GlobalKey();
@@ -62,6 +66,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(replaceEditPageStateProvider.notifier).clear();
       ref.read(captureScreenStateProvider.notifier).clear();
+      ref.read(replaceFormatStateProvider.notifier).formatInit();
     }
 
     void handleFirstTapImage(details) {
@@ -114,6 +119,24 @@ class ReplaceEditPage extends HookConsumerWidget {
           ref.read(captureAreaScreenUseCaseProvider);
         });
       }
+    }
+
+    void handleSelectMove() {
+      if (movePosition.value == Offset.zero) {
+        print('not move');
+        return;
+      }
+      if (selectedArea.value == null) {
+        print('not selected area');
+        return;
+      }
+      final replaceDataId = replaceFormatData == null ? '1' : (replaceFormatData.replaceDataList.length + 1).toString();
+      final addData = ReplaceData(
+          replaceDataId: replaceDataId,
+          area: selectedArea.value!,
+          moveDelta: MoveDelta(dx: movePosition.value.dx, dy: movePosition.value.dy));
+      print('addData $addData');
+      ref.read(replaceFormatStateProvider.notifier).addReplaceData(addData);
     }
 
     void backHome(BuildContext context) {
@@ -207,6 +230,40 @@ class ReplaceEditPage extends HookConsumerWidget {
               ),
             ),
 
+            //// キャプチャした画像 move select mode
+            captureImage != null && pickImage != null
+                ? Positioned(
+                    top: movePosition.value.dy,
+                    left: movePosition.value.dx,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        print('move');
+                        movePosition.value = Offset(
+                          movePosition.value.dx + details.delta.dx,
+                          movePosition.value.dy + details.delta.dy,
+                        );
+                      },
+                      child: SizedBox(
+                        width: w,
+                        height: pickImage.image.height / pickImage.image.width * w,
+                        // width: (temporaryArea.value!.secondPointX - temporaryArea.value!.firstPointX).abs(),
+                        // height: (temporaryArea.value!.secondPointY - temporaryArea.value!.firstPointY).abs(),
+                        child: CustomPaint(
+                          painter: ImagePainter(captureImage),
+                          size: Size(captureImage.width.toDouble() * w / (pickImage!.image.width),
+                              captureImage.height.toDouble() * w / (pickImage.image.width)),
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox(),
+            Positioned(
+              bottom: 100,
+              left: 0,
+              child:
+                  SizedBox(width: w, height: 100, child: MoveSelectListView(list: replaceFormatData?.replaceDataList)),
+            ),
+
             /// 右下のプラスボタン
             Positioned(
               bottom: 20,
@@ -261,38 +318,22 @@ class ReplaceEditPage extends HookConsumerWidget {
                                 repeat: false,
                                 width: 50,
                                 height: 50)),
+                    const SizedBox(width: 24),
+                    IconButton(
+                        onPressed: () {
+                          handleSelectMove();
+                        },
+                        icon: const FaIcon(
+                          FontAwesomeIcons.check,
+                          color: Color(
+                            MyColors.light,
+                          ),
+                          size: 40,
+                        ))
                   ],
                 ),
               ),
             ),
-
-            //// キャプチャした画像 move select mode
-            captureImage != null && pickImage != null
-                ? Positioned(
-                    top: movePosition.value.dy,
-                    left: movePosition.value.dx,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        print('move');
-                        movePosition.value = Offset(
-                          movePosition.value.dx + details.delta.dx,
-                          movePosition.value.dy + details.delta.dy,
-                        );
-                      },
-                      child: SizedBox(
-                        width: w,
-                        height: pickImage.image.height / pickImage.image.width * w,
-                        // width: (temporaryArea.value!.secondPointX - temporaryArea.value!.firstPointX).abs(),
-                        // height: (temporaryArea.value!.secondPointY - temporaryArea.value!.firstPointY).abs(),
-                        child: CustomPaint(
-                          painter: ImagePainter(captureImage),
-                          size: Size(captureImage.width.toDouble() * w / (pickImage!.image.width),
-                              captureImage.height.toDouble() * w / (pickImage.image.width)),
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
           ],
         ),
       ),
@@ -314,5 +355,36 @@ class ImagePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+class MoveSelectListView extends StatelessWidget {
+  final List<ReplaceData?>? list;
+  const MoveSelectListView({super.key, required this.list});
+
+  @override
+  Widget build(BuildContext context) {
+    return list != null
+        ? ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: list!.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  print('tapped');
+                },
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade200,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text((list![index]!.replaceDataId).toString()),
+                ),
+              );
+            },
+          )
+        : const SizedBox();
   }
 }

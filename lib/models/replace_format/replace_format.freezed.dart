@@ -23,7 +23,7 @@ mixin _$ReplaceFormat {
   String get templateId => throw _privateConstructorUsedError;
   String get templateName => throw _privateConstructorUsedError;
   String get thumbnailImage => throw _privateConstructorUsedError;
-  ReplaceData get replaceData => throw _privateConstructorUsedError;
+  List<ReplaceData> get replaceDataList => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -42,10 +42,8 @@ abstract class $ReplaceFormatCopyWith<$Res> {
       {String templateId,
       String templateName,
       String thumbnailImage,
-      ReplaceData replaceData,
+      List<ReplaceData> replaceDataList,
       DateTime createdAt});
-
-  $ReplaceDataCopyWith<$Res> get replaceData;
 }
 
 /// @nodoc
@@ -64,7 +62,7 @@ class _$ReplaceFormatCopyWithImpl<$Res, $Val extends ReplaceFormat>
     Object? templateId = null,
     Object? templateName = null,
     Object? thumbnailImage = null,
-    Object? replaceData = null,
+    Object? replaceDataList = null,
     Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
@@ -80,23 +78,15 @@ class _$ReplaceFormatCopyWithImpl<$Res, $Val extends ReplaceFormat>
           ? _value.thumbnailImage
           : thumbnailImage // ignore: cast_nullable_to_non_nullable
               as String,
-      replaceData: null == replaceData
-          ? _value.replaceData
-          : replaceData // ignore: cast_nullable_to_non_nullable
-              as ReplaceData,
+      replaceDataList: null == replaceDataList
+          ? _value.replaceDataList
+          : replaceDataList // ignore: cast_nullable_to_non_nullable
+              as List<ReplaceData>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ) as $Val);
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  $ReplaceDataCopyWith<$Res> get replaceData {
-    return $ReplaceDataCopyWith<$Res>(_value.replaceData, (value) {
-      return _then(_value.copyWith(replaceData: value) as $Val);
-    });
   }
 }
 
@@ -112,11 +102,8 @@ abstract class _$$ReplaceFormatImplCopyWith<$Res>
       {String templateId,
       String templateName,
       String thumbnailImage,
-      ReplaceData replaceData,
+      List<ReplaceData> replaceDataList,
       DateTime createdAt});
-
-  @override
-  $ReplaceDataCopyWith<$Res> get replaceData;
 }
 
 /// @nodoc
@@ -133,7 +120,7 @@ class __$$ReplaceFormatImplCopyWithImpl<$Res>
     Object? templateId = null,
     Object? templateName = null,
     Object? thumbnailImage = null,
-    Object? replaceData = null,
+    Object? replaceDataList = null,
     Object? createdAt = null,
   }) {
     return _then(_$ReplaceFormatImpl(
@@ -149,10 +136,10 @@ class __$$ReplaceFormatImplCopyWithImpl<$Res>
           ? _value.thumbnailImage
           : thumbnailImage // ignore: cast_nullable_to_non_nullable
               as String,
-      replaceData: null == replaceData
-          ? _value.replaceData
-          : replaceData // ignore: cast_nullable_to_non_nullable
-              as ReplaceData,
+      replaceDataList: null == replaceDataList
+          ? _value._replaceDataList
+          : replaceDataList // ignore: cast_nullable_to_non_nullable
+              as List<ReplaceData>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -168,8 +155,9 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
       {required this.templateId,
       required this.templateName,
       required this.thumbnailImage,
-      required this.replaceData,
-      required this.createdAt});
+      required final List<ReplaceData> replaceDataList,
+      required this.createdAt})
+      : _replaceDataList = replaceDataList;
 
   factory _$ReplaceFormatImpl.fromJson(Map<String, dynamic> json) =>
       _$$ReplaceFormatImplFromJson(json);
@@ -180,14 +168,20 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
   final String templateName;
   @override
   final String thumbnailImage;
+  final List<ReplaceData> _replaceDataList;
   @override
-  final ReplaceData replaceData;
+  List<ReplaceData> get replaceDataList {
+    if (_replaceDataList is EqualUnmodifiableListView) return _replaceDataList;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_replaceDataList);
+  }
+
   @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'ReplaceFormat(templateId: $templateId, templateName: $templateName, thumbnailImage: $thumbnailImage, replaceData: $replaceData, createdAt: $createdAt)';
+    return 'ReplaceFormat(templateId: $templateId, templateName: $templateName, thumbnailImage: $thumbnailImage, replaceDataList: $replaceDataList, createdAt: $createdAt)';
   }
 
   @override
@@ -201,16 +195,21 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
                 other.templateName == templateName) &&
             (identical(other.thumbnailImage, thumbnailImage) ||
                 other.thumbnailImage == thumbnailImage) &&
-            (identical(other.replaceData, replaceData) ||
-                other.replaceData == replaceData) &&
+            const DeepCollectionEquality()
+                .equals(other._replaceDataList, _replaceDataList) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, templateId, templateName,
-      thumbnailImage, replaceData, createdAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      templateId,
+      templateName,
+      thumbnailImage,
+      const DeepCollectionEquality().hash(_replaceDataList),
+      createdAt);
 
   @JsonKey(ignore: true)
   @override
@@ -231,7 +230,7 @@ abstract class _ReplaceFormat implements ReplaceFormat {
       {required final String templateId,
       required final String templateName,
       required final String thumbnailImage,
-      required final ReplaceData replaceData,
+      required final List<ReplaceData> replaceDataList,
       required final DateTime createdAt}) = _$ReplaceFormatImpl;
 
   factory _ReplaceFormat.fromJson(Map<String, dynamic> json) =
@@ -244,7 +243,7 @@ abstract class _ReplaceFormat implements ReplaceFormat {
   @override
   String get thumbnailImage;
   @override
-  ReplaceData get replaceData;
+  List<ReplaceData> get replaceDataList;
   @override
   DateTime get createdAt;
   @override

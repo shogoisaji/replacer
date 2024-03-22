@@ -10,7 +10,7 @@ class ReplaceFormat with _$ReplaceFormat {
     required String templateId,
     required String templateName,
     required String thumbnailImage,
-    required ReplaceData replaceData,
+    required List<ReplaceData> replaceDataList,
     required DateTime createdAt,
   }) = _ReplaceFormat;
 
