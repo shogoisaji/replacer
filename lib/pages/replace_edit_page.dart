@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:replacer/models/area_model/area_model.dart';
 import 'package:replacer/models/move_delta/move_delta.dart';
 import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/states/capture_screen_state.dart';
+import 'package:replacer/states/check_replace_data_state.dart';
 import 'package:replacer/states/image_pick_state.dart';
 import 'package:replacer/states/replace_edit_page_state.dart';
 import 'package:replacer/states/replace_edit_state.dart';
@@ -31,13 +33,14 @@ class ReplaceEditPage extends HookConsumerWidget {
     final w = MediaQuery.sizeOf(context).width;
     final temporaryFirstPoint = useState<Offset?>(null);
     final movePosition = useState<Offset>(Offset.zero);
-    final temporaryArea = useState<AreaModel?>(null);
-    final selectedArea = useState<AreaModel?>(null);
+    final temporaryArea = useState<AreaModel?>(null); // before move
+    final selectedArea = useState<AreaModel?>(null); // after move
     final lottieController = useAnimationController(duration: const Duration(milliseconds: 2000), initialValue: 1);
     final currentMode = ref.watch(replaceEditStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
     final captureImage = ref.watch(captureScreenStateProvider);
     final replaceFormatData = ref.watch(replaceFormatStateProvider);
+    final replaceCheckData = ref.watch(checkReplaceDataStateProvider);
 
     final Offset imageArea =
         pickImage != null ? Offset(w, pickImage.image.height / pickImage.image.width * w) : Offset.zero;
@@ -47,6 +50,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = null;
       selectedArea.value = null;
       movePosition.value = Offset.zero;
+      ref.read(checkReplaceDataStateProvider.notifier).clear();
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(captureScreenStateProvider.notifier).clear();
     }
@@ -56,6 +60,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = null;
       selectedArea.value = null;
       movePosition.value = Offset.zero;
+      ref.read(checkReplaceDataStateProvider.notifier).clear();
       ref.read(replaceThumbnailStateProvider.notifier).clear();
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(replaceEditPageStateProvider.notifier).clear();
@@ -64,6 +69,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     void handleFirstTapImage(details) {
+      ref.read(checkReplaceDataStateProvider.notifier).clear();
       if (currentMode == ReplaceEditMode.moveSelect) return;
       temporaryFirstPoint.value = details.localPosition;
     }
@@ -101,12 +107,8 @@ class ReplaceEditPage extends HookConsumerWidget {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
         selectedArea.value = temporaryArea.value;
         movePosition.value = Offset(
-          temporaryArea.value!.firstPointX > temporaryArea.value!.secondPointX
-              ? temporaryArea.value!.secondPointX
-              : temporaryArea.value!.firstPointX,
-          temporaryArea.value!.firstPointY > temporaryArea.value!.secondPointY
-              ? temporaryArea.value!.secondPointY
-              : temporaryArea.value!.firstPointY,
+          min(temporaryArea.value!.firstPointX, temporaryArea.value!.secondPointX),
+          min(temporaryArea.value!.firstPointY, temporaryArea.value!.secondPointY),
         );
 
         if (pickImage == null) return;
@@ -121,7 +123,21 @@ class ReplaceEditPage extends HookConsumerWidget {
       }
     }
 
-    Future<void> handleSelectMoved() async {
+    MoveDelta? convertDeltaAreaModel() {
+      if (temporaryArea.value == null || selectedArea.value == null) {
+        print('convertDeltaAreaModel args null');
+        return null;
+      }
+      final deltaX = movePosition.value.dx - selectedArea.value!.firstPointX;
+      final deltaY = movePosition.value.dy - selectedArea.value!.firstPointY;
+
+      return MoveDelta(
+        dx: deltaX,
+        dy: deltaY,
+      );
+    }
+
+    Future<void> handleMovedSave() async {
       if (movePosition.value == Offset.zero) {
         print('not move');
         return;
@@ -136,13 +152,29 @@ class ReplaceEditPage extends HookConsumerWidget {
       ref.read(replaceThumbnailStateProvider.notifier).addThumbnail(convertedThumbnail);
 
       final replaceDataId = (replaceFormatData.replaceDataList.length + 1).toString();
+      final delta = convertDeltaAreaModel();
+      if (delta == null) {
+        print('delta null');
+        return;
+      }
       final addData = ReplaceData(
-          replaceDataId: replaceDataId,
-          area: selectedArea.value!,
-          moveDelta: MoveDelta(dx: movePosition.value.dx, dy: movePosition.value.dy));
-
+          replaceDataId: replaceDataId, area: selectedArea.value!, moveDelta: MoveDelta(dx: delta.dx, dy: delta.dy));
       ref.read(replaceFormatStateProvider.notifier).addReplaceData(addData);
       resetToNextArea();
+    }
+
+    AreaModel convertMovedAreaForCheck() {
+      if (replaceCheckData == null) {
+        print('replaceCheckData null');
+        return const AreaModel();
+      }
+
+      return AreaModel(
+        firstPointX: replaceCheckData.area.firstPointX + replaceCheckData.moveDelta.dx,
+        firstPointY: replaceCheckData.area.firstPointY + replaceCheckData.moveDelta.dy,
+        secondPointX: replaceCheckData.area.secondPointX + replaceCheckData.moveDelta.dx,
+        secondPointY: replaceCheckData.area.secondPointY + replaceCheckData.moveDelta.dy,
+      );
     }
 
     void backHome(BuildContext context) {
@@ -217,6 +249,22 @@ class ReplaceEditPage extends HookConsumerWidget {
                   )
                 : const SizedBox(),
 
+            /// replace date check widget
+            replaceCheckData != null
+                ? AreaSelectWidget(
+                    area: replaceCheckData.area,
+                    color: Colors.green,
+                    isSelected: false,
+                  )
+                : const SizedBox(),
+            replaceCheckData != null
+                ? AreaSelectWidget(
+                    area: convertMovedAreaForCheck(), // TODO
+                    color: Colors.green,
+                    isSelected: true,
+                  )
+                : const SizedBox(),
+
             /// selectable area
             GestureDetector(
               onPanUpdate: (details) {
@@ -236,7 +284,6 @@ class ReplaceEditPage extends HookConsumerWidget {
                     left: movePosition.value.dx,
                     child: GestureDetector(
                       onPanUpdate: (details) {
-                        print('move');
                         movePosition.value = Offset(
                           movePosition.value.dx + details.delta.dx,
                           movePosition.value.dy + details.delta.dy,
@@ -246,12 +293,8 @@ class ReplaceEditPage extends HookConsumerWidget {
                         color: Colors.blue.withOpacity(0.5),
                         width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs(),
                         height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs(),
-                        // width: (temporaryArea.value!.secondPointX - temporaryArea.value!.firstPointX).abs(),
-                        // height: (temporaryArea.value!.secondPointY - temporaryArea.value!.firstPointY).abs(),
                         child: CustomPaint(
                           painter: ImagePainter(captureImage),
-                          // size: Size(captureImage.width.toDouble() * w / (pickImage.image.width),
-                          //     captureImage.height.toDouble() * w / (pickImage.image.width)),
                         ),
                       ),
                     ),
@@ -321,7 +364,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                     const SizedBox(width: 24),
                     IconButton(
                         onPressed: () {
-                          handleSelectMoved();
+                          handleMovedSave();
                         },
                         icon: const FaIcon(
                           FontAwesomeIcons.check,
@@ -348,7 +391,7 @@ class ImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print('paint$size');
+    print('custom painter paint too many ?');
     paintImage(canvas: canvas, rect: Rect.fromLTWH(0, 0, size.width, size.height), image: image);
   }
 
@@ -369,8 +412,13 @@ class MoveSelectListView extends ConsumerWidget {
     final thumbnailList = ref.watch(replaceThumbnailStateProvider);
 
     void handleDelete(int index) {
+      ref.read(checkReplaceDataStateProvider.notifier).clear();
       ref.read(replaceFormatStateProvider.notifier).removeReplaceData(index);
       ref.read(replaceThumbnailStateProvider.notifier).removeThumbnail(index);
+    }
+
+    void handleTapThumbnail(int index) {
+      ref.read(checkReplaceDataStateProvider.notifier).setData(list[index]!);
     }
 
     return ListView.builder(
@@ -426,7 +474,7 @@ class MoveSelectListView extends ConsumerWidget {
                         child: thumbnailList.length > index
                             ? GestureDetector(
                                 onTap: () {
-                                  print('tapped $index');
+                                  handleTapThumbnail(index);
                                 },
                                 child: ClipRRect(
                                     borderRadius: BorderRadius.circular(6), child: Image.memory(thumbnailList[index])),
