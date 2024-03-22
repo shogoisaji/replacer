@@ -128,8 +128,8 @@ class ReplaceEditPage extends HookConsumerWidget {
         print('convertDeltaAreaModel args null');
         return null;
       }
-      final deltaX = movePosition.value.dx - selectedArea.value!.firstPointX;
-      final deltaY = movePosition.value.dy - selectedArea.value!.firstPointY;
+      final deltaX = movePosition.value.dx - min(selectedArea.value!.firstPointX, selectedArea.value!.secondPointX);
+      final deltaY = movePosition.value.dy - min(selectedArea.value!.firstPointY, selectedArea.value!.secondPointY);
 
       return MoveDelta(
         dx: deltaX,
