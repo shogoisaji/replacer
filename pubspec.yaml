@@ -23,6 +23,7 @@ dependencies:
     image_picker:
     image:
     lottie:
+    image_gallery_saver:
     cupertino_icons: ^1.0.2
 
 dev_dependencies:
