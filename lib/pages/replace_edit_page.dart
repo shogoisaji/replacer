@@ -197,15 +197,18 @@ class ReplaceEditPage extends HookConsumerWidget {
           },
         ),
         actions: [
-          IconButton(
-              onPressed: () {
-                print('export');
-                context.push('/export_page');
-              },
-              icon: const FaIcon(
-                FontAwesomeIcons.arrowUpRightFromSquare,
-                color: Color(MyColors.light),
-              ))
+          replaceFormatData.replaceDataList.isNotEmpty
+              ? IconButton(
+                  onPressed: () {
+                    print('export');
+                    context.push('/export_page');
+                  },
+                  padding: const EdgeInsets.only(right: 12),
+                  icon: const FaIcon(
+                    FontAwesomeIcons.arrowUpRightFromSquare,
+                    color: Color(MyColors.light),
+                  ))
+              : const SizedBox(),
         ],
         title: Text('Replace Edit', style: MyTextStyles.subtitle),
       ),
@@ -293,9 +296,9 @@ class ReplaceEditPage extends HookConsumerWidget {
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 2,
+                              color: Colors.black.withOpacity(0.6),
+                              spreadRadius: 1,
+                              blurRadius: 3,
                               offset: const Offset(0, 2),
                             ),
                           ],

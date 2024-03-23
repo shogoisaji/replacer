@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:replacer/models/move_delta/move_delta.dart';
 import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/models/replace_format/replace_format.dart';
 import 'package:replacer/use_case/clip_image_usecase.dart';
@@ -26,12 +25,8 @@ class ImageReplaceConvertUseCase {
     final canvas = Canvas(recorder);
     final paint = Paint();
 
-    // 全体の画像を指定された幅で描画
-    // final scale = w / image.width;
-    // canvas.scale(scale);
     canvas.drawImage(image, Offset.zero, paint);
 
-    // 切り取った画像を元の画像上に配置
     for (final clippedImageData in clippedImageDataList) {
       final imageSize = Size(clippedImageData.image.width.toDouble(), clippedImageData.image.height.toDouble());
       final src = Rect.fromLTWH(0, 0, imageSize.width, imageSize.height);

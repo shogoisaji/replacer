@@ -29,6 +29,16 @@ class MyTextStyles {
         overflow: TextOverflow.ellipsis);
   }
 
+  static TextStyle get largeBodyLight {
+    return const TextStyle(
+        color: Color(MyColors.light), fontWeight: FontWeight.w700, fontSize: 24, overflow: TextOverflow.ellipsis);
+  }
+
+  static TextStyle get largeBodyOrange {
+    return const TextStyle(
+        color: Color(MyColors.orange1), fontWeight: FontWeight.w700, fontSize: 24, overflow: TextOverflow.ellipsis);
+  }
+
   static TextStyle get bodyLight {
     return const TextStyle(
         color: Color(MyColors.light), fontWeight: FontWeight.w500, fontSize: 16, overflow: TextOverflow.ellipsis);

@@ -32,6 +32,7 @@ class AreaSelectWidget extends HookConsumerWidget {
               decoration: BoxDecoration(
                 color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
                 border: Border.all(color: color, width: 2),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
