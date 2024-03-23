@@ -290,7 +290,16 @@ class ReplaceEditPage extends HookConsumerWidget {
                         );
                       },
                       child: Container(
-                        color: Colors.blue.withOpacity(0.5),
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 2,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
                         width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs(),
                         height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs(),
                         child: CustomPaint(
@@ -494,13 +503,32 @@ class ReplaceDataListView extends HookConsumerWidget {
                               width: _arrowButtonWidth,
                               height: _arrowButtonWidth,
                               padding: const EdgeInsets.all(8),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
-                                    border: Border.all(color: const Color(MyColors.orange1), width: 2)),
-                                child: slideAnimationController.isCompleted
-                                    ? const Icon(Icons.arrow_forward, color: Color(MyColors.orange1), size: 32)
-                                    : const Icon(Icons.arrow_back, color: Color(MyColors.orange1), size: 32),
+                              child: Stack(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: const Color(MyColors.orange1), width: 2)),
+                                      child: slideAnimationController.isCompleted
+                                          ? const Icon(Icons.arrow_forward, color: Color(MyColors.orange1), size: 32)
+                                          : const Icon(Icons.arrow_back, color: Color(MyColors.orange1), size: 32),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: const Color(MyColors.light),
+                                            border: Border.all(color: const Color(MyColors.orange1), width: 2)),
+                                        child: Text(list.length.toString(), style: MyTextStyles.smallOrange)),
+                                  )
+                                ],
                               )),
                         ),
                       ),
