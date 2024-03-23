@@ -23,7 +23,7 @@ import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
 import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/area_select_widget.dart';
-import 'package:replacer/widgets/capture_widget.dart';
+import 'package:replacer/widgets/capture_area_widget.dart';
 
 class ReplaceEditPage extends HookConsumerWidget {
   const ReplaceEditPage({super.key});
@@ -243,7 +243,7 @@ class ReplaceEditPage extends HookConsumerWidget {
 
             /// selected area
             selectedArea.value != null
-                ? CaptureWidget(
+                ? CaptureAreaWidget(
                     area: selectedArea.value ?? const AreaModel(),
                     color: Colors.red,
                   )
@@ -511,6 +511,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
+                                          color: const Color(MyColors.light),
                                           border: Border.all(color: const Color(MyColors.orange1), width: 2)),
                                       child: slideAnimationController.isCompleted
                                           ? const Icon(Icons.arrow_forward, color: Color(MyColors.orange1), size: 32)
@@ -521,7 +522,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                     bottom: 0,
                                     right: 0,
                                     child: Container(
-                                        padding: const EdgeInsets.all(4),
+                                        padding: const EdgeInsets.all(5),
                                         decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: const Color(MyColors.light),
@@ -542,7 +543,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                               return Align(
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
-                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  margin: const EdgeInsets.only(right: 8),
                                   decoration: BoxDecoration(
                                     color: const Color(MyColors.orange1),
                                     borderRadius: BorderRadius.circular(12),

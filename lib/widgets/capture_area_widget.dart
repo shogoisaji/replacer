@@ -8,10 +8,10 @@ import 'package:replacer/models/area_model/area_model.dart';
 import 'package:replacer/models/pick_image/pick_image.dart';
 import 'package:replacer/states/image_pick_state.dart';
 
-class CaptureWidget extends HookConsumerWidget {
+class CaptureAreaWidget extends HookConsumerWidget {
   final AreaModel area;
   final Color color;
-  const CaptureWidget({
+  const CaptureAreaWidget({
     Key? key,
     required this.area,
     required this.color,
