@@ -38,4 +38,22 @@ class MyTextStyles {
     return const TextStyle(
         color: Color(MyColors.orange1), fontWeight: FontWeight.w500, fontSize: 16, overflow: TextOverflow.ellipsis);
   }
+
+  static TextStyle get smallLight {
+    return const TextStyle(
+        color: Color(MyColors.light),
+        height: 0.7,
+        fontWeight: FontWeight.w500,
+        fontSize: 12,
+        overflow: TextOverflow.ellipsis);
+  }
+
+  static TextStyle get smallOrange {
+    return const TextStyle(
+        color: Color(MyColors.orange1),
+        height: 0.7,
+        fontWeight: FontWeight.w500,
+        fontSize: 12,
+        overflow: TextOverflow.ellipsis);
+  }
 }

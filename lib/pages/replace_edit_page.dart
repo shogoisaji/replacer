@@ -305,37 +305,6 @@ class ReplaceEditPage extends HookConsumerWidget {
             replaceFormatData.replaceDataList.isNotEmpty
                 ? Positioned(bottom: 100, left: 0, child: ReplaceDataListView(list: replaceFormatData.replaceDataList))
                 : const SizedBox(),
-            // Positioned(
-            //     bottom: 100,
-            //     left: w - 70,
-            //     child: Row(
-            //       children: [
-            //         GestureDetector(
-            //           onTap: () {
-            //             print('back');
-            //           },
-            //           child: Center(
-            //             child: Container(
-            //                 width: 70,
-            //                 height: 70,
-            //                 padding: const EdgeInsets.all(8),
-            //                 child: Container(
-            //                   decoration: BoxDecoration(
-            //                       borderRadius: BorderRadius.circular(100),
-            //                       border: Border.all(color: const Color(MyColors.orange1), width: 2)),
-            //                   padding: const EdgeInsets.all(8.0),
-            //                   child: const Icon(Icons.arrow_back, color: Color(MyColors.orange1), size: 32),
-            //                 )),
-            //           ),
-            //         ),
-            //         SizedBox(
-            //             width: w - 70,
-            //             height: 150,
-            //             child: ReplaceDataListView(list: replaceFormatData.replaceDataList)),
-            //       ],
-            //     ),
-            //   )
-            // : const SizedBox(),
 
             /// 下のプラスボタン
             pickImage == null
@@ -425,7 +394,13 @@ class ReplaceEditPage extends HookConsumerWidget {
                               borderRadius: BorderRadius.circular(100),
                               border: Border.all(color: const Color(MyColors.light), width: 2),
                             ),
-                            child: Text('Select Area', style: MyTextStyles.bodyLight))
+                            child: Column(
+                              children: [
+                                Text('Select Area', style: MyTextStyles.bodyLight),
+                                Text('Mode', style: MyTextStyles.smallLight),
+                                const SizedBox(height: 2),
+                              ],
+                            ))
                         : Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
@@ -433,7 +408,13 @@ class ReplaceEditPage extends HookConsumerWidget {
                               borderRadius: BorderRadius.circular(100),
                               border: Border.all(color: const Color(MyColors.orange1), width: 2.5),
                             ),
-                            child: Text('Move Area', style: MyTextStyles.bodyOrange)),
+                            child: Column(
+                              children: [
+                                Text('Move Area', style: MyTextStyles.bodyOrange),
+                                Text('Mode', style: MyTextStyles.smallOrange),
+                                const SizedBox(height: 2),
+                              ],
+                            )),
                   )
                 : const SizedBox(),
           ],
