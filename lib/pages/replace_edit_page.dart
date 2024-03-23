@@ -277,7 +277,7 @@ class ReplaceEditPage extends HookConsumerWidget {
               ),
             ),
 
-            //// キャプチャした画像 move select mode
+            /// キャプチャした画像
             captureImage != null && pickImage != null && selectedArea.value != null
                 ? Positioned(
                     top: movePosition.value.dy,
@@ -300,83 +300,142 @@ class ReplaceEditPage extends HookConsumerWidget {
                     ),
                   )
                 : const SizedBox(),
-            Positioned(
-              bottom: 100,
-              left: 0,
-              child:
-                  SizedBox(width: w, height: 150, child: MoveSelectListView(list: replaceFormatData.replaceDataList)),
-            ),
 
-            /// 右下のプラスボタン
-            Positioned(
-              bottom: 20,
-              right: 20,
-              child: IconButton(
-                onPressed: () {
-                  handlePickImage();
-                },
-                icon: const FaIcon(
-                  FontAwesomeIcons.plus,
-                  color: Color(MyColors.orange1),
-                  size: 50,
-                ),
-              ),
-            ),
+            /// replace data list
+            replaceFormatData.replaceDataList.isNotEmpty
+                ? Positioned(bottom: 100, left: 0, child: ReplaceDataListView(list: replaceFormatData.replaceDataList))
+                : const SizedBox(),
+            // Positioned(
+            //     bottom: 100,
+            //     left: w - 70,
+            //     child: Row(
+            //       children: [
+            //         GestureDetector(
+            //           onTap: () {
+            //             print('back');
+            //           },
+            //           child: Center(
+            //             child: Container(
+            //                 width: 70,
+            //                 height: 70,
+            //                 padding: const EdgeInsets.all(8),
+            //                 child: Container(
+            //                   decoration: BoxDecoration(
+            //                       borderRadius: BorderRadius.circular(100),
+            //                       border: Border.all(color: const Color(MyColors.orange1), width: 2)),
+            //                   padding: const EdgeInsets.all(8.0),
+            //                   child: const Icon(Icons.arrow_back, color: Color(MyColors.orange1), size: 32),
+            //                 )),
+            //           ),
+            //         ),
+            //         SizedBox(
+            //             width: w - 70,
+            //             height: 150,
+            //             child: ReplaceDataListView(list: replaceFormatData.replaceDataList)),
+            //       ],
+            //     ),
+            //   )
+            // : const SizedBox(),
 
-            /// 左下のモードチェンジボタン
-            Positioned(
-              bottom: 20,
-              left: 20,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(MyColors.orange1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    currentMode == ReplaceEditMode.areaSelect
-                        ? GestureDetector(
-                            onTap: () {
-                              if (temporaryArea.value == null) return;
-                              lottieController.reset();
-                              lottieController.forward();
-                              handleChangeMode();
-                            },
-                            child: Lottie.asset('assets/lottie/area.json',
-                                controller: lottieController,
-                                addRepaintBoundary: true,
-                                repeat: false,
-                                width: 50,
-                                height: 50))
-                        : GestureDetector(
-                            onTap: () {
-                              lottieController.reset();
-                              lottieController.forward();
-                              handleChangeMode();
-                            },
-                            child: Lottie.asset('assets/lottie/move.json',
-                                controller: lottieController,
-                                addRepaintBoundary: true,
-                                repeat: false,
-                                width: 50,
-                                height: 50)),
-                    const SizedBox(width: 24),
-                    IconButton(
-                        onPressed: () {
-                          handleMovedSave();
-                        },
-                        icon: const FaIcon(
-                          FontAwesomeIcons.check,
-                          color: Color(
-                            MyColors.light,
-                          ),
-                          size: 40,
-                        ))
-                  ],
-                ),
-              ),
-            ),
+            /// 下のプラスボタン
+            pickImage == null
+                ? Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: IconButton(
+                      onPressed: () {
+                        handlePickImage();
+                      },
+                      icon: const FaIcon(
+                        FontAwesomeIcons.plus,
+                        color: Color(MyColors.orange1),
+                        size: 50,
+                      ),
+                    ),
+                  )
+                : const SizedBox(),
+
+            /// 下のモードチェンジボタン
+            pickImage != null
+                ? Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(MyColors.orange1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          currentMode == ReplaceEditMode.areaSelect
+                              ? GestureDetector(
+                                  onTap: () {
+                                    if (temporaryArea.value == null) return;
+                                    lottieController.reset();
+                                    lottieController.forward();
+                                    handleChangeMode();
+                                  },
+                                  child: Lottie.asset('assets/lottie/area.json',
+                                      controller: lottieController,
+                                      addRepaintBoundary: true,
+                                      repeat: false,
+                                      width: 50,
+                                      height: 50))
+                              : GestureDetector(
+                                  onTap: () {
+                                    lottieController.reset();
+                                    lottieController.forward();
+                                    handleChangeMode();
+                                  },
+                                  child: Lottie.asset('assets/lottie/move.json',
+                                      controller: lottieController,
+                                      addRepaintBoundary: true,
+                                      repeat: false,
+                                      width: 50,
+                                      height: 50)),
+                          const SizedBox(width: 24),
+                          IconButton(
+                              onPressed: () {
+                                handleMovedSave();
+                              },
+                              icon: const FaIcon(
+                                FontAwesomeIcons.check,
+                                color: Color(
+                                  MyColors.light,
+                                ),
+                                size: 40,
+                              ))
+                        ],
+                      ),
+                    ),
+                  )
+                : const SizedBox(),
+
+            /// current mode label
+            pickImage != null
+                ? Positioned(
+                    bottom: 20,
+                    left: 20,
+                    child: currentMode == ReplaceEditMode.areaSelect
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(MyColors.orange1),
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(color: const Color(MyColors.light), width: 2),
+                            ),
+                            child: Text('Select Area', style: MyTextStyles.bodyLight))
+                        : Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(MyColors.light),
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(color: const Color(MyColors.orange1), width: 2.5),
+                            ),
+                            child: Text('Move Area', style: MyTextStyles.bodyOrange)),
+                  )
+                : const SizedBox(),
           ],
         ),
       ),
@@ -401,15 +460,19 @@ class ImagePainter extends CustomPainter {
   }
 }
 
-class MoveSelectListView extends ConsumerWidget {
+class ReplaceDataListView extends HookConsumerWidget {
   final List<ReplaceData?> list;
-  const MoveSelectListView({super.key, required this.list});
+  const ReplaceDataListView({super.key, required this.list});
 
-  static const double _height = 70;
+  static const double _innerWidgetHeight = 70;
+  static const double _arrowButtonWidth = 70;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final w = MediaQuery.sizeOf(context).width;
     final thumbnailList = ref.watch(replaceThumbnailStateProvider);
+    final slideAnimationController = useAnimationController(duration: const Duration(milliseconds: 400));
+    final sliderAnimation = CurvedAnimation(parent: slideAnimationController, curve: Curves.easeInOut);
 
     void handleDelete(int index) {
       ref.read(checkReplaceDataStateProvider.notifier).clear();
@@ -421,74 +484,114 @@ class MoveSelectListView extends ConsumerWidget {
       ref.read(checkReplaceDataStateProvider.notifier).setData(list[index]!);
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      scrollDirection: Axis.horizontal,
-      itemCount: list.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            print('tapped');
-          },
-          child: Align(
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color: const Color(MyColors.orange1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return SizedBox(
+      width: w,
+      height: 150,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          AnimatedBuilder(
+            animation: sliderAnimation,
+            builder: (context, child) {
+              return Positioned(
+                left: (1 - sliderAnimation.value) * (w - _arrowButtonWidth),
+                child: SizedBox(
+                  width: w,
+                  height: 150,
+                  child: Row(
                     children: [
                       GestureDetector(
                         onTap: () {
-                          handleDelete(index);
+                          if (slideAnimationController.isCompleted) {
+                            slideAnimationController.reverse();
+                          } else {
+                            slideAnimationController.forward();
+                          }
                         },
-                        child: Container(
-                          height: _height,
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: const Color(MyColors.light),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const FaIcon(
-                            FontAwesomeIcons.trash,
-                            color: Color(MyColors.orange1),
-                          ),
+                        child: Center(
+                          child: Container(
+                              width: _arrowButtonWidth,
+                              height: _arrowButtonWidth,
+                              padding: const EdgeInsets.all(8),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(100),
+                                    border: Border.all(color: const Color(MyColors.orange1), width: 2)),
+                                child: slideAnimationController.isCompleted
+                                    ? const Icon(Icons.arrow_forward, color: Color(MyColors.orange1), size: 32)
+                                    : const Icon(Icons.arrow_back, color: Color(MyColors.orange1), size: 32),
+                              )),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: _height,
-                        height: _height,
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: const Color(MyColors.light),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: thumbnailList.length > index
-                            ? GestureDetector(
-                                onTap: () {
-                                  handleTapThumbnail(index);
-                                },
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(6), child: Image.memory(thumbnailList[index])),
-                              )
-                            : const SizedBox(),
-                      ),
+                      SizedBox(
+                          width: w - _arrowButtonWidth,
+                          height: 150,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: list.length,
+                            itemBuilder: (context, index) {
+                              return Align(
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(MyColors.orange1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          handleDelete(index);
+                                        },
+                                        child: Container(
+                                          height: _innerWidgetHeight,
+                                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: const Color(MyColors.light),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: const FaIcon(
+                                            FontAwesomeIcons.trash,
+                                            color: Color(MyColors.orange1),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        width: _innerWidgetHeight,
+                                        height: _innerWidgetHeight,
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: const Color(MyColors.light),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: thumbnailList.length > index
+                                            ? GestureDetector(
+                                                onTap: () {
+                                                  handleTapThumbnail(index);
+                                                },
+                                                child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    child: Image.memory(thumbnailList[index])),
+                                              )
+                                            : const SizedBox(),
+                                      )
+                                    ])
+                                  ]),
+                                ),
+                              );
+                            },
+                          )),
                     ],
-                  )
-                ],
-              ),
-            ),
+                  ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
