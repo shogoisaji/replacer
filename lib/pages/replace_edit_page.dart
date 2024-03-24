@@ -31,8 +31,9 @@ class ReplaceEditPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final w = MediaQuery.sizeOf(context).width;
+    final h = MediaQuery.sizeOf(context).height;
     final temporaryFirstPoint = useState<Offset?>(null);
-    final movePosition = useState<Offset>(Offset.zero);
+    final movedPosition = useState<Offset>(Offset.zero);
     final temporaryArea = useState<AreaModel?>(null); // before move
     final selectedArea = useState<AreaModel?>(null); // after move
     final lottieController = useAnimationController(duration: const Duration(milliseconds: 2000), initialValue: 1);
@@ -41,6 +42,8 @@ class ReplaceEditPage extends HookConsumerWidget {
     final captureImage = ref.watch(captureScreenStateProvider);
     final replaceFormatData = ref.watch(replaceFormatStateProvider);
     final replaceCheckData = ref.watch(checkReplaceDataStateProvider);
+    final displaySizeRate = useState(1.0); // 画像が画面がへoverflowした場合に小さくする用
+    final imageSizeConvertRate = useState(1.0); // pickImage width / display width
 
     final Offset imageArea =
         pickImage != null ? Offset(w, pickImage.image.height / pickImage.image.width * w) : Offset.zero;
@@ -49,7 +52,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryFirstPoint.value = null;
       temporaryArea.value = null;
       selectedArea.value = null;
-      movePosition.value = Offset.zero;
+      movedPosition.value = Offset.zero;
       ref.read(checkReplaceDataStateProvider.notifier).clear();
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(captureScreenStateProvider.notifier).clear();
@@ -59,7 +62,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryFirstPoint.value = null;
       temporaryArea.value = null;
       selectedArea.value = null;
-      movePosition.value = Offset.zero;
+      movedPosition.value = Offset.zero;
       ref.read(checkReplaceDataStateProvider.notifier).clear();
       ref.read(replaceThumbnailStateProvider.notifier).clear();
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
@@ -71,7 +74,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     void handleFirstTapImage(details) {
       ref.read(checkReplaceDataStateProvider.notifier).clear();
       if (currentMode == ReplaceEditMode.moveSelect) return;
-      temporaryFirstPoint.value = details.localPosition;
+      temporaryFirstPoint.value = details.localPosition * imageSizeConvertRate.value;
     }
 
     void handleAreaSelect(details) {
@@ -79,8 +82,8 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = AreaModel(
         firstPointX: temporaryFirstPoint.value!.dx,
         firstPointY: temporaryFirstPoint.value!.dy,
-        secondPointX: details.localPosition.dx,
-        secondPointY: details.localPosition.dy,
+        secondPointX: details.localPosition.dx * imageSizeConvertRate.value,
+        secondPointY: details.localPosition.dy * imageSizeConvertRate.value,
       );
     }
 
@@ -90,12 +93,40 @@ class ReplaceEditPage extends HookConsumerWidget {
       resetAll();
     }
 
+    /// pick imageが画面より縦長の場合、imageを小さくする
+    void setPickImageAspectRatio() {
+      if (pickImage == null) return;
+      final mediaQuery = MediaQuery.of(context);
+
+      final pickImageAspectRatio = pickImage.image.width / pickImage.image.height;
+      final displayEffectiveRange = h - (mediaQuery.padding.top + kToolbarHeight + mediaQuery.padding.bottom);
+      final displayAspectRatio = w / displayEffectiveRange;
+
+      /// pick imageが画面より縦長の場合
+      if (pickImageAspectRatio < displayAspectRatio) {
+        final convertedHeight = w / pickImage.image.width * pickImage.image.height;
+        final rate = displayEffectiveRange / convertedHeight;
+        displaySizeRate.value = rate;
+      }
+    }
+
+    useEffect(() {
+      if (pickImage == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setPickImageAspectRatio();
+      });
+
+      imageSizeConvertRate.value = pickImage.image.width / w / displaySizeRate.value;
+
+      return null;
+    }, [pickImage]);
+
     void handleOnPanUpdate(details) {
       temporaryArea.value = AreaModel(
-        firstPointX: temporaryArea.value!.firstPointX + details.delta.dx,
-        firstPointY: temporaryArea.value!.firstPointY + details.delta.dy,
-        secondPointX: temporaryArea.value!.secondPointX + details.delta.dx,
-        secondPointY: temporaryArea.value!.secondPointY + details.delta.dy,
+        firstPointX: temporaryArea.value!.firstPointX + details.delta.dx * imageSizeConvertRate.value,
+        firstPointY: temporaryArea.value!.firstPointY + details.delta.dy * imageSizeConvertRate.value,
+        secondPointX: temporaryArea.value!.secondPointX + details.delta.dx * imageSizeConvertRate.value,
+        secondPointY: temporaryArea.value!.secondPointY + details.delta.dy * imageSizeConvertRate.value,
       );
     }
 
@@ -106,18 +137,14 @@ class ReplaceEditPage extends HookConsumerWidget {
       } else {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
         selectedArea.value = temporaryArea.value;
-        movePosition.value = Offset(
+        movedPosition.value = Offset(
           min(temporaryArea.value!.firstPointX, temporaryArea.value!.secondPointX),
           min(temporaryArea.value!.firstPointY, temporaryArea.value!.secondPointY),
         );
 
         if (pickImage == null) return;
-        final sizeConvertRate = pickImage.image.width / w;
-        final Rect rect = Rect.fromPoints(
-            Offset(
-                selectedArea.value!.firstPointX * sizeConvertRate, selectedArea.value!.firstPointY * sizeConvertRate),
-            Offset(selectedArea.value!.secondPointX * sizeConvertRate,
-                selectedArea.value!.secondPointY * sizeConvertRate));
+        final Rect rect = Rect.fromPoints(Offset(selectedArea.value!.firstPointX, selectedArea.value!.firstPointY),
+            Offset(selectedArea.value!.secondPointX, selectedArea.value!.secondPointY));
 
         ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
       }
@@ -128,8 +155,8 @@ class ReplaceEditPage extends HookConsumerWidget {
         print('convertDeltaAreaModel args null');
         return null;
       }
-      final deltaX = movePosition.value.dx - min(selectedArea.value!.firstPointX, selectedArea.value!.secondPointX);
-      final deltaY = movePosition.value.dy - min(selectedArea.value!.firstPointY, selectedArea.value!.secondPointY);
+      final deltaX = movedPosition.value.dx - min(selectedArea.value!.firstPointX, selectedArea.value!.secondPointX);
+      final deltaY = movedPosition.value.dy - min(selectedArea.value!.firstPointY, selectedArea.value!.secondPointY);
 
       return MoveDelta(
         dx: deltaX,
@@ -138,7 +165,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     Future<void> handleMovedSave() async {
-      if (movePosition.value == Offset.zero) {
+      if (movedPosition.value == Offset.zero) {
         print('not move');
         return;
       }
@@ -200,7 +227,6 @@ class ReplaceEditPage extends HookConsumerWidget {
           replaceFormatData.replaceDataList.isNotEmpty
               ? IconButton(
                   onPressed: () {
-                    print('export');
                     context.push('/export_page');
                   },
                   padding: const EdgeInsets.only(right: 12),
@@ -213,20 +239,20 @@ class ReplaceEditPage extends HookConsumerWidget {
         title: Text('Replace Edit', style: MyTextStyles.subtitle),
       ),
       body: SafeArea(
+        bottom: false,
         child: Stack(
           children: [
             pickImage == null
                 ? const SizedBox()
-                : Align(
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                      width: w,
-                      height: pickImage.image.height / pickImage.image.width * w,
-                      child: RepaintBoundary(
-                        child: CustomPaint(
-                          painter: ImagePainter(pickImage.image),
-                          // size: Size(pickImage.image.width.toDouble(), pickImage.image.height.toDouble()),
-                        ),
+                : Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Container(
+                      color: Colors.red,
+                      width: w * displaySizeRate.value,
+                      height: pickImage.image.height / pickImage.image.width * w * displaySizeRate.value,
+                      child: CustomPaint(
+                        painter: ImagePainter(pickImage.image),
                       ),
                     ),
                   ),
@@ -245,12 +271,12 @@ class ReplaceEditPage extends HookConsumerWidget {
             ),
 
             /// selected area
-            selectedArea.value != null
-                ? CaptureAreaWidget(
-                    area: selectedArea.value ?? const AreaModel(),
-                    color: Colors.red,
-                  )
-                : const SizedBox(),
+            // selectedArea.value != null
+            //     ? CaptureAreaWidget(
+            //         area: selectedArea.value ?? const AreaModel(),
+            //         color: Colors.red,
+            //       )
+            //     : const SizedBox(),
 
             /// replace date check widget
             replaceCheckData != null
@@ -258,6 +284,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                     area: replaceCheckData.area,
                     color: Colors.green,
                     isSelected: false,
+                    resizeRate: imageSizeConvertRate.value,
                   )
                 : const SizedBox(),
             replaceCheckData != null
@@ -265,6 +292,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                     area: convertMovedAreaForCheck(), // TODO
                     color: Colors.green,
                     isSelected: true,
+                    resizeRate: imageSizeConvertRate.value,
                   )
                 : const SizedBox(),
 
@@ -275,21 +303,22 @@ class ReplaceEditPage extends HookConsumerWidget {
               },
               child: AreaSelectWidget(
                 area: temporaryArea.value ?? const AreaModel(),
-                color: Colors.red,
+                color: const Color(MyColors.orange1),
                 isSelected: currentMode == ReplaceEditMode.moveSelect,
+                resizeRate: imageSizeConvertRate.value,
               ),
             ),
 
             /// キャプチャした画像
             captureImage != null && pickImage != null && selectedArea.value != null
                 ? Positioned(
-                    top: movePosition.value.dy,
-                    left: movePosition.value.dx,
+                    top: movedPosition.value.dy / imageSizeConvertRate.value,
+                    left: movedPosition.value.dx / imageSizeConvertRate.value,
                     child: GestureDetector(
                       onPanUpdate: (details) {
-                        movePosition.value = Offset(
-                          movePosition.value.dx + details.delta.dx,
-                          movePosition.value.dy + details.delta.dy,
+                        movedPosition.value = Offset(
+                          movedPosition.value.dx + details.delta.dx * imageSizeConvertRate.value,
+                          movedPosition.value.dy + details.delta.dy * imageSizeConvertRate.value,
                         );
                       },
                       child: Container(
@@ -303,8 +332,10 @@ class ReplaceEditPage extends HookConsumerWidget {
                             ),
                           ],
                         ),
-                        width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs(),
-                        height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs(),
+                        width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs() /
+                            imageSizeConvertRate.value,
+                        height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs() /
+                            imageSizeConvertRate.value,
                         child: CustomPaint(
                           painter: ImagePainter(captureImage),
                         ),
@@ -322,18 +353,20 @@ class ReplaceEditPage extends HookConsumerWidget {
             pickImage == null
                 ? Positioned(
                     bottom: 20,
-                    right: 20,
-                    child: IconButton(
-                      onPressed: () {
+                    right: 30,
+                    child: GestureDetector(
+                      onTap: () {
                         handlePickImage();
                       },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.plus,
-                        color: Color(MyColors.orange1),
-                        size: 50,
-                      ),
-                    ),
-                  )
+                      child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: Lottie.asset(
+                            'assets/lottie/add.json',
+                            repeat: true,
+                            addRepaintBoundary: true,
+                          )),
+                    ))
                 : const SizedBox(),
 
             /// 下のモードチェンジボタン
@@ -410,7 +443,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                               children: [
                                 Text('Select Area', style: MyTextStyles.bodyLight),
                                 Text('Mode', style: MyTextStyles.smallLight),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: 3),
                               ],
                             ))
                         : Container(
@@ -424,7 +457,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                               children: [
                                 Text('Move Area', style: MyTextStyles.bodyOrange),
                                 Text('Mode', style: MyTextStyles.smallOrange),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: 3),
                               ],
                             )),
                   )
@@ -436,7 +469,7 @@ class ReplaceEditPage extends HookConsumerWidget {
   }
 }
 
-/// 画像を描画するためのCustomPainter ui.Imageを使用しているため
+/// ui.Imageの画像を描画するためのCustomPainter
 class ImagePainter extends CustomPainter {
   final ui.Image image;
   ImagePainter(this.image);

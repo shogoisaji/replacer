@@ -9,11 +9,13 @@ class AreaSelectWidget extends HookConsumerWidget {
   final AreaModel area;
   final Color color;
   final bool isSelected;
+  final double resizeRate;
   const AreaSelectWidget({
     super.key,
     required this.area,
     required this.color,
     required this.isSelected,
+    required this.resizeRate,
   });
 
   @override
@@ -24,15 +26,15 @@ class AreaSelectWidget extends HookConsumerWidget {
       child: Stack(
         children: [
           Positioned(
-            top: area.firstPointY < area.secondPointY ? area.firstPointY : area.secondPointY,
-            left: area.firstPointX < area.secondPointX ? area.firstPointX : area.secondPointX,
+            top: area.firstPointY < area.secondPointY ? area.firstPointY / resizeRate : area.secondPointY / resizeRate,
+            left: area.firstPointX < area.secondPointX ? area.firstPointX / resizeRate : area.secondPointX / resizeRate,
             child: Container(
-              width: (area.secondPointX - area.firstPointX).abs(),
-              height: (area.secondPointY - area.firstPointY).abs(),
+              width: (area.secondPointX - area.firstPointX).abs() / resizeRate,
+              height: (area.secondPointY - area.firstPointY).abs() / resizeRate,
               decoration: BoxDecoration(
-                color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
+                color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
                 border: Border.all(color: color, width: 2),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(3),
               ),
             ),
           ),
