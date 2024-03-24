@@ -39,6 +39,11 @@ class MyTextStyles {
         color: Color(MyColors.orange1), fontWeight: FontWeight.w700, fontSize: 24, overflow: TextOverflow.ellipsis);
   }
 
+  static TextStyle get middleOrange {
+    return const TextStyle(
+        color: Color(MyColors.orange1), fontWeight: FontWeight.w700, fontSize: 20, overflow: TextOverflow.ellipsis);
+  }
+
   static TextStyle get bodyLight {
     return const TextStyle(
         color: Color(MyColors.light), fontWeight: FontWeight.w500, fontSize: 16, overflow: TextOverflow.ellipsis);

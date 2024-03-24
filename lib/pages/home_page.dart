@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 
@@ -29,12 +30,12 @@ class HomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
               Text(
                 'Replacer',
                 style: MyTextStyles.title,
               ),
-              const SizedBox(height: 100),
+              const SizedBox(height: 60),
               Container(
                   // width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -62,7 +63,7 @@ class HomePage extends StatelessWidget {
                           margin: const EdgeInsets.only(left: 8),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Color(MyColors.light),
+                            color: const Color(MyColors.light),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text('Edit', style: MyTextStyles.subtitleOrange),
@@ -70,16 +71,34 @@ class HomePage extends StatelessWidget {
                       )
                     ],
                   )),
-              const SizedBox(height: 100),
+              // const SizedBox(height: 200),
+              Container(
+                width: double.infinity,
+                height: 200,
+                margin: const EdgeInsets.symmetric(vertical: 32),
+                decoration: BoxDecoration(
+                  color: const Color(MyColors.light),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: const Color(MyColors.light),
+                    width: 2,
+                  ),
+                ),
+                child: Lottie.asset(
+                  'assets/lottie/demo.json',
+                  repeat: true,
+                ),
+              ),
               Expanded(
                 child: Container(
                     width: double.infinity,
                     height: double.infinity,
+                    padding: const EdgeInsets.only(top: 0.8),
                     decoration: const BoxDecoration(
                       color: Color(MyColors.orange1),
                       borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
+                        topLeft: Radius.circular(22),
+                        topRight: Radius.circular(22),
                       ),
                       border: Border(
                         top: BorderSide(color: Color(MyColors.light), width: 2),
@@ -113,7 +132,7 @@ class HomePage extends StatelessWidget {
     return Container(
       height: 200,
       margin:
-          EdgeInsets.only(top: 12, bottom: index == formatList.length - 1 || index == formatList.length - 2 ? 20 : 0),
+          EdgeInsets.only(top: 12, bottom: index == formatList.length - 1 || index == formatList.length - 2 ? 10 : 0),
       decoration: BoxDecoration(
         color: const Color(MyColors.orange1),
         border: Border.all(
