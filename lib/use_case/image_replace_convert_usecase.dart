@@ -8,13 +8,16 @@ import 'package:replacer/models/replace_format/replace_format.dart';
 import 'package:replacer/use_case/clip_image_usecase.dart';
 
 class ImageReplaceConvertUseCase {
-  Future<Uint8List> convertImage(ui.Image image, ReplaceFormat format, double w) async {
+  Future<Uint8List> convertImage(
+    ui.Image image,
+    ReplaceFormat format,
+    double imageSizeConvertRate,
+  ) async {
     final clippedImageDataList = <ClippedImageData>[];
-    final sizeConvertRate = image.width / w;
     for (ReplaceData data in format.replaceDataList) {
       final area = data.area;
-      final rect = Rect.fromPoints(Offset(area.firstPointX * sizeConvertRate, area.firstPointY * sizeConvertRate),
-          Offset(area.secondPointX * sizeConvertRate, area.secondPointY * sizeConvertRate));
+      final rect =
+          Rect.fromPoints(Offset(area.firstPointX, area.firstPointY), Offset(area.secondPointX, area.secondPointY));
       final clippedImage = await ClipImageUseCase().clipImage(image, rect);
       final offsetOrigin = Offset(min(area.firstPointX, area.secondPointX) + data.moveDelta.dx,
           min(area.firstPointY, area.secondPointY) + data.moveDelta.dy);
@@ -30,9 +33,7 @@ class ImageReplaceConvertUseCase {
     for (final clippedImageData in clippedImageDataList) {
       final imageSize = Size(clippedImageData.image.width.toDouble(), clippedImageData.image.height.toDouble());
       final src = Rect.fromLTWH(0, 0, imageSize.width, imageSize.height);
-      final dstOffset = Offset(
-          clippedImageData.offsetOrigin.dx * sizeConvertRate, clippedImageData.offsetOrigin.dy * sizeConvertRate);
-      print(dstOffset);
+      final dstOffset = Offset(clippedImageData.offsetOrigin.dx, clippedImageData.offsetOrigin.dy);
       final dst = Rect.fromLTWH(dstOffset.dx, dstOffset.dy, imageSize.width, imageSize.height);
       canvas.drawImageRect(clippedImageData.image, src, dst, paint);
     }

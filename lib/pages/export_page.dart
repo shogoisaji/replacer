@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:replacer/states/image_pick_state.dart';
+import 'package:replacer/states/loading_state.dart';
 import 'package:replacer/states/replace_format_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
@@ -20,22 +21,24 @@ class ExportPage extends HookConsumerWidget {
     final replaceFormat = ref.watch(replaceFormatStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
     final imageMemory = useState<Uint8List?>(null);
+    final imageSizeConvertRate =
+        pickImage != null ? pickImage.image.width / size.width : 1.0; // pickImage width / display width
 
     void convert() async {
       if (pickImage == null || replaceFormat.replaceDataList.isEmpty) return;
-      ImageReplaceConvertUseCase()
-          .convertImage(
+      ref.read(loadingStateProvider.notifier).show();
+      imageMemory.value = await ImageReplaceConvertUseCase().convertImage(
         pickImage.image,
         replaceFormat,
         size.width,
-      )
-          .then((value) {
-        imageMemory.value = value;
-      });
+      );
+      ref.read(loadingStateProvider.notifier).hide();
     }
 
     useEffect(() {
-      convert();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        convert();
+      });
       return null;
     }, []);
 
@@ -43,34 +46,47 @@ class ExportPage extends HookConsumerWidget {
       backgroundColor: const Color(MyColors.light),
       appBar: AppBar(
         backgroundColor: const Color(MyColors.orange1),
-        title: Text('Export', style: MyTextStyles.subtitle),
+        title: Text('Converted Image', style: MyTextStyles.subtitle),
         leading: const SizedBox(),
       ),
       body: SafeArea(
+        bottom: false,
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
             imageMemory.value != null
-                ? Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Image.memory(
-                      imageMemory.value!,
-                      width: size.width,
+                ? SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Image.memory(
+                          imageMemory.value!,
+                          width: size.width,
+                        ),
+                        const SizedBox(height: 100),
+                      ],
                     ),
                   )
                 : const SizedBox(),
             Positioned(
-                bottom: 20,
-                right: 20,
+                bottom: 30,
+                right: 40,
                 child: GestureDetector(
                   onTap: () async {
                     if (imageMemory.value == null) return;
                     final result = await ImageSaveUseCase().saveImage(imageMemory.value!);
-                    if (result == true) {
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(const SnackBar(content: Text('Successfully saved image')));
+                    if (result == true && context.mounted) {
                       context.go('/');
+                      showDialog(
+                        barrierColor: Colors.black.withOpacity(0.3),
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          return customDialog(context);
+                        },
+                      );
+
+                      // ScaffoldMessenger.of(context)
+                      //     .showSnackBar(const SnackBar(content: Text('Successfully saved image')));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to save image')));
                     }
@@ -89,8 +105,8 @@ class ExportPage extends HookConsumerWidget {
                       )),
                 )),
             Positioned(
-                bottom: 20,
-                left: 20,
+                bottom: 30,
+                left: 40,
                 child: GestureDetector(
                   onTap: () {
                     context.pop();
@@ -104,10 +120,96 @@ class ExportPage extends HookConsumerWidget {
                       ),
                       child: Column(
                         children: [
-                          Text('Cancel', style: MyTextStyles.largeBodyOrange),
+                          Text('Back', style: MyTextStyles.largeBodyOrange),
                         ],
                       )),
                 )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget customDialog(BuildContext context) {
+    final w = MediaQuery.sizeOf(context).width;
+    void handleSaveFormat() {
+      // Save format
+    }
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Container(
+        width: w * 0.8,
+        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+        decoration: BoxDecoration(
+          color: const Color(MyColors.light),
+          border: Border.all(color: const Color(MyColors.orange1), width: 3),
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              '🎉Image saved🎉',
+              style: MyTextStyles.largeBodyOrange,
+            ),
+            const SizedBox(
+              height: 8.0,
+            ),
+            Text(
+              'Save this format ?',
+              style: MyTextStyles.middleOrange,
+            ),
+            const SizedBox(
+              height: 20.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(MyColors.light),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(color: const Color(MyColors.orange1), width: 2),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('NoSave', style: MyTextStyles.largeBodyOrange),
+                        ],
+                      )),
+                ),
+                const SizedBox(
+                  width: 8.0,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    handleSaveFormat();
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(MyColors.orange1),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(color: const Color(MyColors.light), width: 2),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('Save', style: MyTextStyles.largeBodyLight),
+                        ],
+                      )),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 4.0,
+            ),
           ],
         ),
       ),
