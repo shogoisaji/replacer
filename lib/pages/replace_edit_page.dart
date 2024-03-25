@@ -23,7 +23,6 @@ import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
 import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/area_select_widget.dart';
-import 'package:replacer/widgets/capture_area_widget.dart';
 
 class ReplaceEditPage extends HookConsumerWidget {
   const ReplaceEditPage({super.key});

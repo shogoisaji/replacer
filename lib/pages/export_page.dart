@@ -21,8 +21,8 @@ class ExportPage extends HookConsumerWidget {
     final replaceFormat = ref.watch(replaceFormatStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
     final imageMemory = useState<Uint8List?>(null);
-    final imageSizeConvertRate =
-        pickImage != null ? pickImage.image.width / size.width : 1.0; // pickImage width / display width
+    // final imageSizeConvertRate =
+    //     pickImage != null ? pickImage.image.width / size.width : 1.0; // pickImage width / display width
 
     void convert() async {
       if (pickImage == null || replaceFormat.replaceDataList.isEmpty) return;
