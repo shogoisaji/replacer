@@ -216,13 +216,13 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(MyColors.light),
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         backgroundColor: const Color(MyColors.orange1),
         leading: IconButton(
-          icon: const FaIcon(
+          icon: FaIcon(
             FontAwesomeIcons.arrowLeft,
-            color: Color(MyColors.light),
+            color: Theme.of(context).primaryColor,
             size: 32,
           ),
           onPressed: () {
@@ -236,13 +236,13 @@ class ReplaceEditPage extends HookConsumerWidget {
                     context.push('/export_page');
                   },
                   padding: const EdgeInsets.only(right: 12),
-                  icon: const FaIcon(
+                  icon: FaIcon(
                     FontAwesomeIcons.arrowUpRightFromSquare,
-                    color: Color(MyColors.light),
+                    color: Theme.of(context).primaryColor,
                   ))
               : const SizedBox(),
         ],
-        title: Text('Replace Edit', style: MyTextStyles.subtitle),
+        title: Text('Replace Edit', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
       ),
       body: SafeArea(
         bottom: false,
@@ -411,11 +411,9 @@ class ReplaceEditPage extends HookConsumerWidget {
                               onPressed: () {
                                 handleMovedSave();
                               },
-                              icon: const FaIcon(
+                              icon: FaIcon(
                                 FontAwesomeIcons.check,
-                                color: Color(
-                                  MyColors.light,
-                                ),
+                                color: Theme.of(context).primaryColor,
                                 size: 40,
                               ))
                         ],
@@ -435,26 +433,38 @@ class ReplaceEditPage extends HookConsumerWidget {
                             decoration: BoxDecoration(
                               color: const Color(MyColors.orange1),
                               borderRadius: BorderRadius.circular(100),
-                              border: Border.all(color: const Color(MyColors.light), width: 2),
+                              border: Border.all(color: Theme.of(context).primaryColor, width: 2),
                             ),
                             child: Column(
                               children: [
-                                Text('Select Area', style: MyTextStyles.bodyLight),
-                                Text('Mode', style: MyTextStyles.smallLight),
+                                Text(
+                                  'Select Area',
+                                  style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
+                                ),
+                                Text(
+                                  'Mode',
+                                  style: MyTextStyles.small.copyWith(color: Theme.of(context).primaryColor),
+                                ),
                                 const SizedBox(height: 3),
                               ],
                             ))
                         : Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(MyColors.light),
+                              color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.circular(100),
                               border: Border.all(color: const Color(MyColors.orange1), width: 2.5),
                             ),
                             child: Column(
                               children: [
-                                Text('Move Area', style: MyTextStyles.bodyOrange),
-                                Text('Mode', style: MyTextStyles.smallOrange),
+                                Text(
+                                  'Move Area',
+                                  style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
+                                ),
+                                Text(
+                                  'Mode',
+                                  style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)),
+                                ),
                                 const SizedBox(height: 3),
                               ],
                             )),
@@ -545,7 +555,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: const Color(MyColors.light),
+                                          color: Theme.of(context).primaryColor,
                                           border: Border.all(color: const Color(MyColors.orange1), width: 2)),
                                       child: slideAnimationController.isCompleted
                                           ? const Icon(Icons.arrow_forward, color: Color(MyColors.orange1), size: 32)
@@ -559,9 +569,10 @@ class ReplaceDataListView extends HookConsumerWidget {
                                         padding: const EdgeInsets.all(5),
                                         decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: const Color(MyColors.light),
+                                            color: Theme.of(context).primaryColor,
                                             border: Border.all(color: const Color(MyColors.orange1), width: 2)),
-                                        child: Text(list.length.toString(), style: MyTextStyles.smallOrange)),
+                                        child: Text(list.length.toString(),
+                                            style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)))),
                                   )
                                 ],
                               )),
@@ -593,7 +604,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                           padding: const EdgeInsets.symmetric(horizontal: 6),
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            color: const Color(MyColors.light),
+                                            color: Theme.of(context).primaryColor,
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: const FaIcon(
@@ -608,7 +619,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                         height: _innerWidgetHeight,
                                         padding: const EdgeInsets.all(2),
                                         decoration: BoxDecoration(
-                                          color: const Color(MyColors.light),
+                                          color: Theme.of(context).primaryColor,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: thumbnailList.length > index

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 
-SnackBar customSnackBar(String text, bool isOrangeBg) {
-  final bgColor = isOrangeBg ? const Color(MyColors.orange1) : const Color(MyColors.light);
-  final subColor = isOrangeBg ? const Color(MyColors.light) : const Color(MyColors.orange1);
+SnackBar customSnackBar(String text, bool isOrangeBg, BuildContext context) {
+  final bgColor = isOrangeBg ? const Color(MyColors.orange1) : Theme.of(context).primaryColor;
+  final subColor = isOrangeBg ? Theme.of(context).primaryColor : const Color(MyColors.orange1);
   return SnackBar(
     duration: const Duration(milliseconds: 1700),
     padding: EdgeInsets.zero,
@@ -51,7 +51,10 @@ SnackBar customSnackBar(String text, bool isOrangeBg) {
             padding: const EdgeInsets.symmetric(vertical: 24),
             color: bgColor,
             child: Center(
-                child: Text(text, style: isOrangeBg ? MyTextStyles.largeBodyLight : MyTextStyles.largeBodyOrange))),
+                child: Text(text,
+                    style: isOrangeBg
+                        ? MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)
+                        : MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1))))),
       ],
     ),
   );

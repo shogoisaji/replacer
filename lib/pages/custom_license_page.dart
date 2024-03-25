@@ -13,14 +13,14 @@ class CustomLicensePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(MyColors.light),
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         backgroundColor: const Color(MyColors.orange1),
-        title: Text('License', style: MyTextStyles.subtitle),
+        title: Text('License', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
         leading: IconButton(
-          icon: const FaIcon(
+          icon: FaIcon(
             FontAwesomeIcons.arrowLeft,
-            color: Color(MyColors.light),
+            color: Theme.of(context).primaryColor,
             size: 32,
           ),
           onPressed: () => context.go('/'),
@@ -85,7 +85,11 @@ class _License extends StatelessWidget {
             list.add(
               Padding(
                 padding: EdgeInsetsDirectional.only(top: 8.0, start: 16.0 * paragraph.indent),
-                child: Text(paragraph.text),
+                child: Text(paragraph.text,
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor == const Color(MyColors.dark)
+                            ? const Color(MyColors.light)
+                            : const Color(MyColors.dark))),
               ),
             );
           }

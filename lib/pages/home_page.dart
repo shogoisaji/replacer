@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:replacer/models/replace_format/replace_format.dart';
 import 'package:replacer/repositories/sqflite/sqflite_repository.dart';
 import 'package:replacer/states/saved_format_list_state.dart';
+import 'package:replacer/states/settings_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 
@@ -20,8 +21,14 @@ class HomePage extends HookConsumerWidget {
     final menuItems = [
       {'title': 'License', 'func': () => context.go('/license')},
       {
-        'title': 'Setting',
-        'func': () => print('Setting'),
+        'title': 'Dark/Light',
+        'func': () {
+          if (ref.read(settingsStateProvider).themeMode == ThemeMode.dark) {
+            ref.read(settingsStateProvider.notifier).changeToLightMode();
+            return;
+          }
+          ref.read(settingsStateProvider.notifier).changeToDarkMode();
+        },
       }
     ];
 
@@ -63,7 +70,7 @@ class HomePage extends HookConsumerWidget {
                   width: double.infinity,
                   alignment: Alignment.centerRight,
                   child: PopupMenuButton<Map<String, dynamic>>(
-                    color: const Color(MyColors.light),
+                    color: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -82,7 +89,7 @@ class HomePage extends HookConsumerWidget {
                   )),
               Text(
                 'Replacer',
-                style: MyTextStyles.title,
+                style: MyTextStyles.title.copyWith(color: Theme.of(context).primaryColor),
               ),
               const SizedBox(height: 50),
               Container(
@@ -91,7 +98,7 @@ class HomePage extends HookConsumerWidget {
                     color: const Color(MyColors.orange1),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
-                      color: const Color(MyColors.light),
+                      color: Theme.of(context).primaryColor,
                       width: 2,
                     ),
                   ),
@@ -102,7 +109,7 @@ class HomePage extends HookConsumerWidget {
                         padding: const EdgeInsets.only(left: 8),
                         child: Text(
                           'NewReplace',
-                          style: MyTextStyles.subtitle,
+                          style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -114,10 +121,11 @@ class HomePage extends HookConsumerWidget {
                           margin: const EdgeInsets.only(left: 8),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(MyColors.light),
+                            color: Theme.of(context).primaryColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text('Edit', style: MyTextStyles.subtitleOrange),
+                          child:
+                              Text('Edit', style: MyTextStyles.subtitle.copyWith(color: const Color(MyColors.orange1))),
                         ),
                       )
                     ],
@@ -127,10 +135,10 @@ class HomePage extends HookConsumerWidget {
                 height: 200,
                 margin: const EdgeInsets.symmetric(vertical: 32),
                 decoration: BoxDecoration(
-                  color: const Color(MyColors.light),
+                  color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: const Color(MyColors.light),
+                    color: Theme.of(context).primaryColor,
                     width: 2,
                   ),
                 ),
@@ -144,16 +152,16 @@ class HomePage extends HookConsumerWidget {
                     width: double.infinity,
                     height: double.infinity,
                     padding: const EdgeInsets.only(top: 0.8, left: 8, right: 8),
-                    decoration: const BoxDecoration(
-                      color: Color(MyColors.orange1),
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      color: const Color(MyColors.orange1),
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(22),
                         topRight: Radius.circular(22),
                       ),
                       border: Border(
-                        top: BorderSide(color: Color(MyColors.light), width: 2),
-                        left: BorderSide(color: Color(MyColors.light), width: 2),
-                        right: BorderSide(color: Color(MyColors.light), width: 2),
+                        top: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                        left: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                        right: BorderSide(color: Theme.of(context).primaryColor, width: 2),
                       ),
                     ),
                     child: CustomScrollView(
@@ -163,7 +171,7 @@ class HomePage extends HookConsumerWidget {
                             padding: const EdgeInsets.only(top: 6, left: 8),
                             child: Text(
                               'ReplaceFormat',
-                              style: MyTextStyles.subtitle,
+                              style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor),
                             ),
                           ),
                         ),
@@ -178,7 +186,7 @@ class HomePage extends HookConsumerWidget {
                                   onLongPress: () async {
                                     deleteFormat(formatList[index].formatId);
                                   },
-                                  child: _gridItem(formatList[index]));
+                                  child: _gridItem(formatList[index], context));
                             },
                             childCount: formatList.length,
                           ),
@@ -196,7 +204,7 @@ class HomePage extends HookConsumerWidget {
     );
   }
 
-  Widget _gridItem(ReplaceFormat format) {
+  Widget _gridItem(ReplaceFormat format, BuildContext context) {
     return Container(
       height: 200,
       margin: const EdgeInsets.only(top: 12),
@@ -204,21 +212,23 @@ class HomePage extends HookConsumerWidget {
       decoration: BoxDecoration(
         color: const Color(MyColors.orange1),
         border: Border.all(
-          color: const Color(MyColors.light),
+          color: Theme.of(context).primaryColor,
           width: 2,
         ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          Center(child: Text(format.formatName, style: MyTextStyles.largeBodyLight)),
+          Center(
+              child: Text(format.formatName,
+                  style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor))),
           Expanded(
             child: Row(
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(MyColors.light),
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: format.thumbnailImage != null
@@ -230,8 +240,9 @@ class HomePage extends HookConsumerWidget {
                             child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('No', style: MyTextStyles.largeBodyOrange),
-                              Text('Image', style: MyTextStyles.largeBodyOrange),
+                              Text('No', style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1))),
+                              Text('Image',
+                                  style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1))),
                             ],
                           )),
                   ),
