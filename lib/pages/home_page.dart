@@ -17,6 +17,14 @@ class HomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formatList = ref.watch(savedFormatListStateProvider);
 
+    final menuItems = [
+      {'title': 'License', 'func': () => context.go('/license')},
+      {
+        'title': 'Setting',
+        'func': () => print('Setting'),
+      }
+    ];
+
     void fetchFormatList() {
       ref
           .read(savedFormatListStateProvider.notifier)
@@ -49,15 +57,35 @@ class HomePage extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const SizedBox(height: 32),
+            children: [
+              Container(
+                  height: 32,
+                  width: double.infinity,
+                  alignment: Alignment.centerRight,
+                  child: PopupMenuButton<Map<String, dynamic>>(
+                    color: const Color(MyColors.light),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    icon: const Icon(Icons.menu, color: Color(MyColors.orange2), size: 28),
+                    onSelected: (Map<String, dynamic> item) {
+                      (item['func'] as Function).call();
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return menuItems.map((item) {
+                        return PopupMenuItem<Map<String, dynamic>>(
+                          value: item,
+                          child: Text(item['title'] as String, style: MyTextStyles.middleOrange),
+                        );
+                      }).toList();
+                    },
+                  )),
               Text(
                 'Replacer',
                 style: MyTextStyles.title,
               ),
               const SizedBox(height: 50),
               Container(
-                  // width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color(MyColors.orange1),
