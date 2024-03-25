@@ -20,9 +20,10 @@ ReplaceFormat _$ReplaceFormatFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ReplaceFormat {
-  String get templateId => throw _privateConstructorUsedError;
-  String get templateName => throw _privateConstructorUsedError;
-  String get thumbnailImage => throw _privateConstructorUsedError;
+  String get formatId => throw _privateConstructorUsedError;
+  String get formatName => throw _privateConstructorUsedError;
+  @Uint8ListConverter()
+  Uint8List? get thumbnailImage => throw _privateConstructorUsedError;
   List<ReplaceData> get replaceDataList => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
@@ -39,9 +40,9 @@ abstract class $ReplaceFormatCopyWith<$Res> {
       _$ReplaceFormatCopyWithImpl<$Res, ReplaceFormat>;
   @useResult
   $Res call(
-      {String templateId,
-      String templateName,
-      String thumbnailImage,
+      {String formatId,
+      String formatName,
+      @Uint8ListConverter() Uint8List? thumbnailImage,
       List<ReplaceData> replaceDataList,
       DateTime createdAt});
 }
@@ -59,25 +60,25 @@ class _$ReplaceFormatCopyWithImpl<$Res, $Val extends ReplaceFormat>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? templateId = null,
-    Object? templateName = null,
-    Object? thumbnailImage = null,
+    Object? formatId = null,
+    Object? formatName = null,
+    Object? thumbnailImage = freezed,
     Object? replaceDataList = null,
     Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
-      templateId: null == templateId
-          ? _value.templateId
-          : templateId // ignore: cast_nullable_to_non_nullable
+      formatId: null == formatId
+          ? _value.formatId
+          : formatId // ignore: cast_nullable_to_non_nullable
               as String,
-      templateName: null == templateName
-          ? _value.templateName
-          : templateName // ignore: cast_nullable_to_non_nullable
+      formatName: null == formatName
+          ? _value.formatName
+          : formatName // ignore: cast_nullable_to_non_nullable
               as String,
-      thumbnailImage: null == thumbnailImage
+      thumbnailImage: freezed == thumbnailImage
           ? _value.thumbnailImage
           : thumbnailImage // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Uint8List?,
       replaceDataList: null == replaceDataList
           ? _value.replaceDataList
           : replaceDataList // ignore: cast_nullable_to_non_nullable
@@ -99,9 +100,9 @@ abstract class _$$ReplaceFormatImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String templateId,
-      String templateName,
-      String thumbnailImage,
+      {String formatId,
+      String formatName,
+      @Uint8ListConverter() Uint8List? thumbnailImage,
       List<ReplaceData> replaceDataList,
       DateTime createdAt});
 }
@@ -117,25 +118,25 @@ class __$$ReplaceFormatImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? templateId = null,
-    Object? templateName = null,
-    Object? thumbnailImage = null,
+    Object? formatId = null,
+    Object? formatName = null,
+    Object? thumbnailImage = freezed,
     Object? replaceDataList = null,
     Object? createdAt = null,
   }) {
     return _then(_$ReplaceFormatImpl(
-      templateId: null == templateId
-          ? _value.templateId
-          : templateId // ignore: cast_nullable_to_non_nullable
+      formatId: null == formatId
+          ? _value.formatId
+          : formatId // ignore: cast_nullable_to_non_nullable
               as String,
-      templateName: null == templateName
-          ? _value.templateName
-          : templateName // ignore: cast_nullable_to_non_nullable
+      formatName: null == formatName
+          ? _value.formatName
+          : formatName // ignore: cast_nullable_to_non_nullable
               as String,
-      thumbnailImage: null == thumbnailImage
+      thumbnailImage: freezed == thumbnailImage
           ? _value.thumbnailImage
           : thumbnailImage // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Uint8List?,
       replaceDataList: null == replaceDataList
           ? _value._replaceDataList
           : replaceDataList // ignore: cast_nullable_to_non_nullable
@@ -152,9 +153,9 @@ class __$$ReplaceFormatImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ReplaceFormatImpl implements _ReplaceFormat {
   const _$ReplaceFormatImpl(
-      {required this.templateId,
-      required this.templateName,
-      required this.thumbnailImage,
+      {required this.formatId,
+      required this.formatName,
+      @Uint8ListConverter() this.thumbnailImage,
       required final List<ReplaceData> replaceDataList,
       required this.createdAt})
       : _replaceDataList = replaceDataList;
@@ -163,11 +164,12 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
       _$$ReplaceFormatImplFromJson(json);
 
   @override
-  final String templateId;
+  final String formatId;
   @override
-  final String templateName;
+  final String formatName;
   @override
-  final String thumbnailImage;
+  @Uint8ListConverter()
+  final Uint8List? thumbnailImage;
   final List<ReplaceData> _replaceDataList;
   @override
   List<ReplaceData> get replaceDataList {
@@ -181,7 +183,7 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
 
   @override
   String toString() {
-    return 'ReplaceFormat(templateId: $templateId, templateName: $templateName, thumbnailImage: $thumbnailImage, replaceDataList: $replaceDataList, createdAt: $createdAt)';
+    return 'ReplaceFormat(formatId: $formatId, formatName: $formatName, thumbnailImage: $thumbnailImage, replaceDataList: $replaceDataList, createdAt: $createdAt)';
   }
 
   @override
@@ -189,12 +191,12 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ReplaceFormatImpl &&
-            (identical(other.templateId, templateId) ||
-                other.templateId == templateId) &&
-            (identical(other.templateName, templateName) ||
-                other.templateName == templateName) &&
-            (identical(other.thumbnailImage, thumbnailImage) ||
-                other.thumbnailImage == thumbnailImage) &&
+            (identical(other.formatId, formatId) ||
+                other.formatId == formatId) &&
+            (identical(other.formatName, formatName) ||
+                other.formatName == formatName) &&
+            const DeepCollectionEquality()
+                .equals(other.thumbnailImage, thumbnailImage) &&
             const DeepCollectionEquality()
                 .equals(other._replaceDataList, _replaceDataList) &&
             (identical(other.createdAt, createdAt) ||
@@ -205,9 +207,9 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      templateId,
-      templateName,
-      thumbnailImage,
+      formatId,
+      formatName,
+      const DeepCollectionEquality().hash(thumbnailImage),
       const DeepCollectionEquality().hash(_replaceDataList),
       createdAt);
 
@@ -227,9 +229,9 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
 
 abstract class _ReplaceFormat implements ReplaceFormat {
   const factory _ReplaceFormat(
-      {required final String templateId,
-      required final String templateName,
-      required final String thumbnailImage,
+      {required final String formatId,
+      required final String formatName,
+      @Uint8ListConverter() final Uint8List? thumbnailImage,
       required final List<ReplaceData> replaceDataList,
       required final DateTime createdAt}) = _$ReplaceFormatImpl;
 
@@ -237,11 +239,12 @@ abstract class _ReplaceFormat implements ReplaceFormat {
       _$ReplaceFormatImpl.fromJson;
 
   @override
-  String get templateId;
+  String get formatId;
   @override
-  String get templateName;
+  String get formatName;
   @override
-  String get thumbnailImage;
+  @Uint8ListConverter()
+  Uint8List? get thumbnailImage;
   @override
   List<ReplaceData> get replaceDataList;
   @override

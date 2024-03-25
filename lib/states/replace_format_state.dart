@@ -4,20 +4,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'replace_format_state.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ReplaceFormatState extends _$ReplaceFormatState {
   @override
   ReplaceFormat build() => ReplaceFormat(
-        templateId: '-',
-        templateName: '-',
-        thumbnailImage: '-',
+        formatId: '000000',
+        formatName: '${DateTime.now().month}/${DateTime.now().day}',
+        thumbnailImage: null,
         replaceDataList: [],
         createdAt: DateTime.now(),
       );
 
   void replaceDataReset() => state = ReplaceFormat(
-        templateId: state.templateId,
-        templateName: state.templateName,
+        formatId: state.formatId,
+        formatName: state.formatName,
         thumbnailImage: state.thumbnailImage,
         replaceDataList: [],
         createdAt: DateTime.now(),
@@ -25,9 +25,8 @@ class ReplaceFormatState extends _$ReplaceFormatState {
 
   void addReplaceData(ReplaceData newReplaceData) {
     state = ReplaceFormat(
-      templateId: state.templateId,
-      templateName: state.templateName,
-      thumbnailImage: state.thumbnailImage,
+      formatId: state.formatId,
+      formatName: state.formatName,
       replaceDataList: [...state.replaceDataList, newReplaceData],
       createdAt: state.createdAt,
     );
@@ -35,8 +34,8 @@ class ReplaceFormatState extends _$ReplaceFormatState {
 
   void removeReplaceData(int index) {
     state = ReplaceFormat(
-      templateId: state.templateId,
-      templateName: state.templateName,
+      formatId: state.formatId,
+      formatName: state.formatName,
       thumbnailImage: state.thumbnailImage,
       replaceDataList: List.from(state.replaceDataList)..removeAt(index),
       createdAt: state.createdAt,

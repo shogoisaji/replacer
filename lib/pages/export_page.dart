@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:replacer/repositories/sqflite/sqflite_repository.dart';
 import 'package:replacer/states/image_pick_state.dart';
 import 'package:replacer/states/loading_state.dart';
 import 'package:replacer/states/replace_format_state.dart';
+import 'package:replacer/states/saved_format_list_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_replace_convert_usecase.dart';
 import 'package:replacer/use_case/image_save_usecase.dart';
+import 'package:replacer/widgets/custom_snack_bar.dart';
 
 class ExportPage extends HookConsumerWidget {
   const ExportPage({super.key});
@@ -21,8 +24,6 @@ class ExportPage extends HookConsumerWidget {
     final replaceFormat = ref.watch(replaceFormatStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
     final imageMemory = useState<Uint8List?>(null);
-    // final imageSizeConvertRate =
-    //     pickImage != null ? pickImage.image.width / size.width : 1.0; // pickImage width / display width
 
     void convert() async {
       if (pickImage == null || replaceFormat.replaceDataList.isEmpty) return;
@@ -46,7 +47,7 @@ class ExportPage extends HookConsumerWidget {
       backgroundColor: const Color(MyColors.light),
       appBar: AppBar(
         backgroundColor: const Color(MyColors.orange1),
-        title: Text('Converted Image', style: MyTextStyles.subtitle),
+        title: Text('Replaced Image', style: MyTextStyles.subtitle),
         leading: const SizedBox(),
       ),
       body: SafeArea(
@@ -75,20 +76,18 @@ class ExportPage extends HookConsumerWidget {
                     if (imageMemory.value == null) return;
                     final result = await ImageSaveUseCase().saveImage(imageMemory.value!);
                     if (result == true && context.mounted) {
-                      context.go('/');
                       showDialog(
                         barrierColor: Colors.black.withOpacity(0.3),
                         barrierDismissible: false,
                         context: context,
                         builder: (context) {
-                          return customDialog(context);
+                          return customDialog(context, ref);
                         },
                       );
-
-                      // ScaffoldMessenger.of(context)
-                      //     .showSnackBar(const SnackBar(content: Text('Successfully saved image')));
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to save image')));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Failed to save image', false));
+                      }
                     }
                   },
                   child: Container(
@@ -130,11 +129,29 @@ class ExportPage extends HookConsumerWidget {
     );
   }
 
-  Widget customDialog(BuildContext context) {
+  Widget customDialog(BuildContext context, WidgetRef ref) {
     final w = MediaQuery.sizeOf(context).width;
-    void handleSaveFormat() {
+
+    Future<void> handleSaveFormat() async {
       // Save format
+      final currentFormat = ref.watch(replaceFormatStateProvider);
+      final sqfliteRepository = SqfliteRepository.instance;
+      final result = await sqfliteRepository.insertFormat(currentFormat);
+      if (result > 0) {
+        if (context.mounted) {
+          ref.read(savedFormatListStateProvider.notifier).fetchFormatList();
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Successfully saved Format', false));
+          context.go('/');
+        }
+      } else {
+        if (context.mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Error saving Format', true));
+        }
+      }
     }
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -170,6 +187,7 @@ class ExportPage extends HookConsumerWidget {
                 GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
+                    context.go('/');
                   },
                   child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
@@ -188,9 +206,8 @@ class ExportPage extends HookConsumerWidget {
                   width: 8.0,
                 ),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     handleSaveFormat();
-                    Navigator.of(context).pop();
                   },
                   child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),

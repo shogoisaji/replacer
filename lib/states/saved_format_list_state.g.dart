@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'replace_format_state.dart';
+part of 'saved_format_list_state.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$replaceFormatStateHash() =>
-    r'a628b0ebf3d12d985280e948c3524fad30246e00';
+String _$savedFormatListStateHash() =>
+    r'922cf1e02333ae77a295834b18249d013925a558';
 
-/// See also [ReplaceFormatState].
-@ProviderFor(ReplaceFormatState)
-final replaceFormatStateProvider =
-    NotifierProvider<ReplaceFormatState, ReplaceFormat>.internal(
-  ReplaceFormatState.new,
-  name: r'replaceFormatStateProvider',
+/// See also [SavedFormatListState].
+@ProviderFor(SavedFormatListState)
+final savedFormatListStateProvider =
+    NotifierProvider<SavedFormatListState, List<ReplaceFormat>>.internal(
+  SavedFormatListState.new,
+  name: r'savedFormatListStateProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$replaceFormatStateHash,
+      : _$savedFormatListStateHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$ReplaceFormatState = Notifier<ReplaceFormat>;
+typedef _$SavedFormatListState = Notifier<List<ReplaceFormat>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

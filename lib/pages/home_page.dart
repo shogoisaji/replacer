@@ -1,23 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
+import 'package:replacer/models/replace_format/replace_format.dart';
+import 'package:replacer/repositories/sqflite/sqflite_repository.dart';
+import 'package:replacer/states/saved_format_list_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
 
-  static const List<String> formatList = [
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f',
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formatList = ref.watch(savedFormatListStateProvider);
+
+    void fetchFormatList() {
+      ref
+          .read(savedFormatListStateProvider.notifier)
+          .fetchFormatList()
+          .then((value) => print('fetchFormatList length: $value'));
+    }
+
+    void deleteFormat(String formatId) async {
+      final sqfliteRepository = SqfliteRepository.instance;
+      final result = await sqfliteRepository.deleteRow(formatId);
+      print('delete result: $result');
+      fetchFormatList();
+    }
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        fetchFormatList();
+      });
+      return null;
+    }, []);
+
     return Scaffold(
       backgroundColor: const Color(MyColors.orange1),
       body: SafeArea(
@@ -35,7 +55,7 @@ class HomePage extends StatelessWidget {
                 'Replacer',
                 style: MyTextStyles.title,
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 50),
               Container(
                   // width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -50,10 +70,13 @@ class HomePage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'NewReplace',
-                        style: MyTextStyles.subtitle,
-                        textAlign: TextAlign.center,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          'NewReplace',
+                          style: MyTextStyles.subtitle,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -71,7 +94,6 @@ class HomePage extends StatelessWidget {
                       )
                     ],
                   )),
-              // const SizedBox(height: 200),
               Container(
                 width: double.infinity,
                 height: 200,
@@ -93,7 +115,7 @@ class HomePage extends StatelessWidget {
                 child: Container(
                     width: double.infinity,
                     height: double.infinity,
-                    padding: const EdgeInsets.only(top: 0.8),
+                    padding: const EdgeInsets.only(top: 0.8, left: 8, right: 8),
                     decoration: const BoxDecoration(
                       color: Color(MyColors.orange1),
                       borderRadius: BorderRadius.only(
@@ -106,21 +128,39 @@ class HomePage extends StatelessWidget {
                         right: BorderSide(color: Color(MyColors.light), width: 2),
                       ),
                     ),
-                    child: GridView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                    child: CustomScrollView(
+                      slivers: <Widget>[
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 6, left: 8),
+                            child: Text(
+                              'ReplaceFormat',
+                              style: MyTextStyles.subtitle,
+                            ),
+                          ),
                         ),
-                        itemCount: formatList.length,
-                        itemBuilder: (context, index) {
-                          return _gridItem(index);
-                        },
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          // mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          // childAspectRatio: 2.0,
-                        ))),
-              ),
+                        SliverGrid(
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              return GestureDetector(
+                                  onLongPress: () async {
+                                    deleteFormat(formatList[index].formatId);
+                                  },
+                                  child: _gridItem(formatList[index]));
+                            },
+                            childCount: formatList.length,
+                          ),
+                        ),
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 100),
+                        ),
+                      ],
+                    )),
+              )
             ],
           ),
         ),
@@ -128,11 +168,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _gridItem(int index) {
+  Widget _gridItem(ReplaceFormat format) {
     return Container(
       height: 200,
-      margin:
-          EdgeInsets.only(top: 12, bottom: index == formatList.length - 1 || index == formatList.length - 2 ? 10 : 0),
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: const Color(MyColors.orange1),
         border: Border.all(
@@ -141,7 +181,38 @@ class HomePage extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Center(child: Text(formatList[index])),
+      child: Column(
+        children: [
+          Center(child: Text(format.formatName, style: MyTextStyles.largeBodyLight)),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(MyColors.light),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: format.thumbnailImage != null
+                        ? Image.memory(
+                            format.thumbnailImage!,
+                            fit: BoxFit.cover,
+                          )
+                        : Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('No', style: MyTextStyles.largeBodyOrange),
+                              Text('Image', style: MyTextStyles.largeBodyOrange),
+                            ],
+                          )),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
