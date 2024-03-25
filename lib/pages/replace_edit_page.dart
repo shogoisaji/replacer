@@ -110,6 +110,13 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        resetAll();
+      });
+
+      return null;
+    }, []);
+    useEffect(() {
       if (pickImage == null) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setPickImageAspectRatio();
@@ -269,14 +276,6 @@ class ReplaceEditPage extends HookConsumerWidget {
               ),
             ),
 
-            /// selected area
-            // selectedArea.value != null
-            //     ? CaptureAreaWidget(
-            //         area: selectedArea.value ?? const AreaModel(),
-            //         color: Colors.red,
-            //       )
-            //     : const SizedBox(),
-
             /// replace date check widget
             replaceCheckData != null
                 ? AreaSelectWidget(
@@ -351,8 +350,8 @@ class ReplaceEditPage extends HookConsumerWidget {
             /// 下のプラスボタン
             pickImage == null
                 ? Positioned(
-                    bottom: 20,
-                    right: 30,
+                    bottom: 50,
+                    right: 50,
                     child: GestureDetector(
                       onTap: () {
                         handlePickImage();
