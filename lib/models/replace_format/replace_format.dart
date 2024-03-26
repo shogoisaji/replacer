@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:replacer/models/area_model/area_model.dart';
 import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -14,6 +15,7 @@ class ReplaceFormat with _$ReplaceFormat {
     required String formatName,
     @Uint8ListConverter() Uint8List? thumbnailImage,
     required List<ReplaceData> replaceDataList,
+    AreaModel? canvasArea,
     required DateTime createdAt,
   }) = _ReplaceFormat;
 

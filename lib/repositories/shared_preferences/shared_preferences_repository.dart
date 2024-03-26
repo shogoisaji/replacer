@@ -17,14 +17,14 @@ class SharedPreferencesRepository {
 
   final SharedPreferences _prefs;
 
-  Future<bool> saveCurrentReservation(SharedPreferencesKey key, String value) async {
-    return _prefs.setString(key.value, value);
+  Future<bool> saveIsDarkMode(SharedPreferencesKey key, bool value) async {
+    return _prefs.setBool(key.value, value);
   }
 
-  String? fetchCurrentReservation(
+  bool? fetchIsDarkMode(
     SharedPreferencesKey key,
   ) {
-    return _prefs.getString(key.value);
+    return _prefs.getBool(key.value);
   }
 
   Future<bool> remove(SharedPreferencesKey key) => _prefs.remove(key.value);

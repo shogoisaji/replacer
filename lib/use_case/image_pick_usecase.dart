@@ -15,19 +15,19 @@ class ImagePickUseCase {
   final Ref ref;
   ImagePickUseCase({required this.ref});
 
-  Future<bool> pickImage() async {
+  Future<Size?> pickImage() async {
     try {
       final XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image == null) return false;
+      if (image == null) return null;
       ref.read(loadingStateProvider.notifier).show();
       final ui.Image? convertedImage = await ImageConverter().convertXFileToImage(image);
-      if (convertedImage == null) return false;
+      if (convertedImage == null) return null;
       ref.read(pickImageStateProvider.notifier).setPickImage(convertedImage);
       ref.read(loadingStateProvider.notifier).hide();
-      return true;
+      return Size(convertedImage.width.toDouble(), convertedImage.height.toDouble());
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
-      return false;
+      return null;
     }
   }
 
@@ -38,7 +38,6 @@ class ImagePickUseCase {
     if (image != null) {
       int width = image.width;
       int height = image.height;
-      print('画像のサイズ: 幅 $width x 高さ $height');
       return Size(width.toDouble(), height.toDouble());
     } else {
       print('画像をデコードできませんでした。');

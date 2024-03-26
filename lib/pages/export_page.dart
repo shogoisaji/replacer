@@ -13,6 +13,7 @@ import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_replace_convert_usecase.dart';
 import 'package:replacer/use_case/image_save_usecase.dart';
+import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/custom_snack_bar.dart';
 
 class ExportPage extends HookConsumerWidget {
@@ -81,7 +82,7 @@ class ExportPage extends HookConsumerWidget {
                         barrierDismissible: false,
                         context: context,
                         builder: (context) {
-                          return customDialog(context, ref);
+                          return customDialog(context, ref, imageMemory.value!);
                         },
                       );
                     } else {
@@ -130,10 +131,12 @@ class ExportPage extends HookConsumerWidget {
     );
   }
 
-  Widget customDialog(BuildContext context, WidgetRef ref) {
+  Widget customDialog(BuildContext context, WidgetRef ref, Uint8List imageMemory) {
     final w = MediaQuery.sizeOf(context).width;
 
     Future<void> handleSaveFormat() async {
+      final formatThumbnail = await ThumbnailResizeUint8ListConverter().convertFormatThumbnail(imageMemory, 100, 100);
+      ref.read(replaceFormatStateProvider.notifier).setThumbnailImage(formatThumbnail);
       final currentFormat = ref.watch(replaceFormatStateProvider);
       final sqfliteRepository = SqfliteRepository.instance;
       final result = await sqfliteRepository.insertFormat(currentFormat);
