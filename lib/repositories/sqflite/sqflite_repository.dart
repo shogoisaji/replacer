@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:replacer/models/area_model/area_model.dart';
 import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/models/replace_format/replace_format.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class SqfliteRepository {
-  static const _databaseName = "sqflite_Database5.db";
+  static const _databaseName = "sqflite_Database8.db";
   static const _databaseVersion = 1;
   static const formatTable = 'formatTable';
 
@@ -54,7 +55,7 @@ class SqfliteRepository {
       return allFormat.isNotEmpty ? allFormat[0].formatId : '000000';
     } catch (e) {
       print('Idの最大値を取得中にエラーが発生しました: $e');
-      return '';
+      return '999999';
     }
   }
 
@@ -75,7 +76,7 @@ class SqfliteRepository {
         thumbnailImage: format.thumbnailImage,
         replaceDataList: encodeReplaceDataList(format.replaceDataList),
         createdAt: format.createdAt.toIso8601String(),
-        canvasArea: format.canvasArea?.toJson(),
+        canvasArea: jsonEncode(format.canvasArea?.toJson()),
       };
       int result = await db.insert(formatTable, row);
       print('データベースへの挿入が成功しました : $row');
@@ -123,13 +124,15 @@ class SqfliteRepository {
     try {
       final List<dynamic> decodedList = jsonDecode(map[replaceDataList]);
       final List<ReplaceData> decodedReplaceDataList = decodedList.map((e) => ReplaceData.fromJson(e)).toList();
+      final decodedCanvasArea = jsonDecode(map[canvasArea]);
+      final AreaModel convertedCanvasArea = AreaModel.fromJson(decodedCanvasArea);
       final format = ReplaceFormat(
         formatId: map[formatId],
         formatName: map[formatName],
         thumbnailImage: map[thumbnailImage],
         replaceDataList: decodedReplaceDataList,
         createdAt: DateTime.parse(map[createdAt]),
-        canvasArea: map[canvasArea],
+        canvasArea: convertedCanvasArea,
       );
       return format;
     } catch (e) {

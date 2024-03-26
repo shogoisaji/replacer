@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -23,6 +24,7 @@ import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
 import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/area_select_widget.dart';
+import 'package:replacer/widgets/canvas_area_mask_widget.dart';
 
 class ReplaceEditPage extends HookConsumerWidget {
   const ReplaceEditPage({super.key});
@@ -50,8 +52,8 @@ class ReplaceEditPage extends HookConsumerWidget {
       selectedArea.value = null;
       movedPosition.value = Offset.zero;
       ref.read(checkReplaceDataStateProvider.notifier).clear();
-      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(captureScreenStateProvider.notifier).clear();
+      print('resetToNextAre : ${replaceFormatData.canvasArea}');
     }
 
     void resetAll() {
@@ -64,13 +66,21 @@ class ReplaceEditPage extends HookConsumerWidget {
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
       ref.read(replaceEditPageStateProvider.notifier).clear();
       ref.read(captureScreenStateProvider.notifier).clear();
-      ref.read(replaceFormatStateProvider.notifier).replaceDataReset();
+      ref.read(replaceFormatStateProvider.notifier).resetFormat();
     }
 
     void handlePickImage() async {
-      final result = await ref.read(imagePickUseCaseProvider).pickImage();
-      if (!result) return;
+      final pickImageSize = await ref.read(imagePickUseCaseProvider).pickImage();
+      if (pickImageSize == null) return;
       resetAll();
+      if (replaceFormatData.canvasArea == null) {
+        final area = AreaModel(
+            firstPointX: 0,
+            firstPointY: 0,
+            secondPointX: pickImageSize.width.toDouble(),
+            secondPointY: pickImageSize.height.toDouble());
+        ref.read(replaceFormatStateProvider.notifier).setCanvasArea(area);
+      }
     }
 
     /// pick imageが画面より縦長の場合、imageを小さくする
@@ -114,13 +124,14 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     void handleSecondPointSelect(details) {
-      if (currentMode == ReplaceEditMode.moveSelect) return;
-      temporaryArea.value = AreaModel(
-        firstPointX: temporaryFirstPoint.value!.dx,
-        firstPointY: temporaryFirstPoint.value!.dy,
-        secondPointX: details.localPosition.dx * imageSizeConvertRate.value,
-        secondPointY: details.localPosition.dy * imageSizeConvertRate.value,
-      );
+      if (currentMode == ReplaceEditMode.areaSelect) {
+        temporaryArea.value = AreaModel(
+          firstPointX: temporaryFirstPoint.value!.dx,
+          firstPointY: temporaryFirstPoint.value!.dy,
+          secondPointX: details.localPosition.dx * imageSizeConvertRate.value,
+          secondPointY: details.localPosition.dy * imageSizeConvertRate.value,
+        );
+      }
     }
 
     void handleSelectedAreaDrag(details) {
@@ -156,7 +167,9 @@ class ReplaceEditPage extends HookConsumerWidget {
       }
     }
 
-    void handleChangeSelectMode() {
+    void handleChangeCanvasSelectMode() {
+      if (pickImage == null) return;
+
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.canvasSelect);
       resetToNextArea();
     }
@@ -206,7 +219,6 @@ class ReplaceEditPage extends HookConsumerWidget {
         print('replaceCheckData null');
         return const AreaModel();
       }
-
       return AreaModel(
         firstPointX: replaceCheckData.area.firstPointX + replaceCheckData.moveDelta.dx,
         firstPointY: replaceCheckData.area.firstPointY + replaceCheckData.moveDelta.dy,
@@ -379,168 +391,211 @@ class ReplaceEditPage extends HookConsumerWidget {
                     )
                   : const SizedBox(),
 
-              /// replace data list
-              replaceFormatData.replaceDataList.isNotEmpty
-                  ? Positioned(
-                      bottom: 100, left: 0, child: ReplaceDataListView(list: replaceFormatData.replaceDataList))
-                  : const SizedBox(),
-
-              /// 下のプラスボタン
-              pickImage == null
-                  ? Positioned(
-                      bottom: 50,
-                      right: 50,
-                      child: GestureDetector(
-                        onTap: () {
-                          handlePickImage();
-                        },
-                        child: SizedBox(
-                            width: 60,
-                            height: 60,
-                            child: Lottie.asset(
-                              'assets/lottie/add.json',
-                              repeat: true,
-                              addRepaintBoundary: true,
-                            )),
-                      ))
-                  : const SizedBox(),
-
-              /// 下のモードチェンジボタン
+              // canvas size mask
               pickImage != null
-                  ? Positioned(
-                      bottom: 20,
-                      right: 20,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(MyColors.orange1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            currentMode == ReplaceEditMode.areaSelect
-                                ? GestureDetector(
-                                    onTap: () {
-                                      if (temporaryArea.value == null) return;
-                                      lottieController.reset();
-                                      lottieController.forward();
-                                      handleChangeMode();
-                                    },
-                                    child: Lottie.asset(
-                                        Theme.of(context).primaryColor == const Color(MyColors.light)
-                                            ? 'assets/lottie/area.json'
-                                            : 'assets/lottie/area_dark.json',
-                                        controller: lottieController,
-                                        addRepaintBoundary: true,
-                                        repeat: false,
-                                        width: 50,
-                                        height: 50))
-                                : GestureDetector(
-                                    onTap: () {
-                                      lottieController.reset();
-                                      lottieController.forward();
-                                      handleChangeMode();
-                                    },
-                                    child: Lottie.asset(
-                                        Theme.of(context).primaryColor == const Color(MyColors.light)
-                                            ? 'assets/lottie/move.json'
-                                            : 'assets/lottie/move_dark.json',
-                                        controller: lottieController,
-                                        addRepaintBoundary: true,
-                                        repeat: false,
-                                        width: 50,
-                                        height: 50)),
-                            const SizedBox(width: 24),
-                            IconButton(
-                                onPressed: () {
-                                  handleMovedSave();
-                                },
-                                icon: FaIcon(
-                                  FontAwesomeIcons.check,
-                                  color: Theme.of(context).primaryColor,
-                                  size: 40,
-                                ))
-                          ],
-                        ),
-                      ),
-                    )
-                  : const SizedBox(),
-
-              /// canvas area select button
-              pickImage != null
-                  ? Positioned(
-                      bottom: 20,
-                      left: 20,
-                      child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(MyColors.orange1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: GestureDetector(
-                              onTap: () {
-                                if (temporaryArea.value == null) return;
-                                lottieController.reset();
-                                lottieController.forward();
-                                handleChangeSelectMode();
-                              },
-                              child: Lottie.asset('assets/lottie/area.json',
-                                  controller: lottieController,
-                                  addRepaintBoundary: true,
-                                  repeat: false,
-                                  width: 50,
-                                  height: 50))),
+                  ? IgnorePointer(
+                      child: CanvasAreaMaskWidget(
+                          area: replaceFormatData.canvasArea ?? const AreaModel(),
+                          resizeRate: imageSizeConvertRate.value,
+                          imageSize: Size(pickImage.image.width.toDouble(), pickImage.image.height.toDouble())),
                     )
                   : const SizedBox.shrink(),
 
-              /// current mode label
-              pickImage != null
-                  ? Positioned(
-                      top: 20,
-                      right: 20,
-                      child: currentMode != ReplaceEditMode.canvasSelect
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(MyColors.orange1),
-                                borderRadius: BorderRadius.circular(100),
-                                border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    currentMode.modeName,
-                                    style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
-                                  ),
-                                  Text(
-                                    'Mode',
-                                    style: MyTextStyles.small.copyWith(color: Theme.of(context).primaryColor),
-                                  ),
-                                  const SizedBox(height: 3),
-                                ],
-                              ))
-                          : Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
-                                borderRadius: BorderRadius.circular(100),
-                                border: Border.all(color: const Color(MyColors.orange1), width: 2.5),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    currentMode.modeName,
-                                    style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
-                                  ),
-                                  Text(
-                                    'Mode',
-                                    style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)),
-                                  ),
-                                  const SizedBox(height: 3),
-                                ],
-                              )),
+              pickImage != null && currentMode == ReplaceEditMode.canvasSelect
+                  ? CanvasAreaSelector(
+                      resizeRate: imageSizeConvertRate.value,
+                      imageSize: Size(pickImage.image.width.toDouble(), pickImage.image.height.toDouble()),
                     )
-                  : const SizedBox(),
+                  : const SizedBox.shrink(),
+
+              currentMode != ReplaceEditMode.canvasSelect
+                  ? Stack(fit: StackFit.expand, children: [
+                      /// replace data list
+                      replaceFormatData.replaceDataList.isNotEmpty
+                          ? Positioned(
+                              bottom: 100, left: 0, child: ReplaceDataListView(list: replaceFormatData.replaceDataList))
+                          : const SizedBox(),
+
+                      /// 下のプラスボタン
+                      pickImage == null
+                          ? Positioned(
+                              bottom: 50,
+                              right: 50,
+                              child: GestureDetector(
+                                onTap: () {
+                                  handlePickImage();
+                                },
+                                child: SizedBox(
+                                    width: 60,
+                                    height: 60,
+                                    child: Lottie.asset(
+                                      'assets/lottie/add.json',
+                                      repeat: true,
+                                      addRepaintBoundary: true,
+                                    )),
+                              ))
+                          : const SizedBox(),
+
+                      /// 下のモードチェンジボタン
+                      pickImage != null
+                          ? Positioned(
+                              bottom: 20,
+                              right: 20,
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(MyColors.orange1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    currentMode == ReplaceEditMode.areaSelect
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              if (temporaryArea.value == null) return;
+                                              lottieController.reset();
+                                              lottieController.forward();
+                                              handleChangeMode();
+                                            },
+                                            child: Lottie.asset(
+                                                Theme.of(context).primaryColor == const Color(MyColors.light)
+                                                    ? 'assets/lottie/area.json'
+                                                    : 'assets/lottie/area_dark.json',
+                                                controller: lottieController,
+                                                addRepaintBoundary: true,
+                                                repeat: false,
+                                                width: 50,
+                                                height: 50))
+                                        : GestureDetector(
+                                            onTap: () {
+                                              lottieController.reset();
+                                              lottieController.forward();
+                                              handleChangeMode();
+                                            },
+                                            child: Lottie.asset(
+                                                Theme.of(context).primaryColor == const Color(MyColors.light)
+                                                    ? 'assets/lottie/move.json'
+                                                    : 'assets/lottie/move_dark.json',
+                                                controller: lottieController,
+                                                addRepaintBoundary: true,
+                                                repeat: false,
+                                                width: 50,
+                                                height: 50)),
+                                    const SizedBox(width: 24),
+                                    IconButton(
+                                        onPressed: () {
+                                          handleMovedSave();
+                                        },
+                                        icon: FaIcon(
+                                          FontAwesomeIcons.check,
+                                          color: Theme.of(context).primaryColor,
+                                          size: 40,
+                                        ))
+                                  ],
+                                ),
+                              ),
+                            )
+                          : const SizedBox(),
+
+                      /// canvas area select button
+                      pickImage != null
+                          ? Positioned(
+                              bottom: 20,
+                              left: 20,
+                              child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: const Color(MyColors.orange1), width: 3),
+                                  ),
+                                  child: GestureDetector(
+                                      onTap: () {
+                                        handleChangeCanvasSelectMode();
+                                      },
+                                      child: Lottie.asset('assets/lottie/resize.json',
+                                          addRepaintBoundary: true, repeat: false, width: 50, height: 50))),
+                            )
+                          : const SizedBox.shrink(),
+
+                      /// current mode label
+                      pickImage != null
+                          ? Positioned(
+                              top: 20,
+                              right: 20,
+                              child: currentMode != ReplaceEditMode.canvasSelect
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(MyColors.orange1),
+                                        borderRadius: BorderRadius.circular(100),
+                                        border: Border.all(color: Theme.of(context).primaryColor, width: 3),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            currentMode.modeName,
+                                            style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
+                                          ),
+                                          Text(
+                                            'Mode',
+                                            style: MyTextStyles.small.copyWith(color: Theme.of(context).primaryColor),
+                                          ),
+                                          const SizedBox(height: 3),
+                                        ],
+                                      ))
+                                  : Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor,
+                                        borderRadius: BorderRadius.circular(100),
+                                        border: Border.all(color: const Color(MyColors.orange1), width: 3.5),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            currentMode.modeName,
+                                            style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
+                                          ),
+                                          Text(
+                                            'Mode',
+                                            style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)),
+                                          ),
+                                          const SizedBox(height: 3),
+                                        ],
+                                      )),
+                            )
+                          : const SizedBox.shrink(),
+                    ])
+                  : Positioned(
+                      top: h / 2,
+                      right: 5,
+                      child: GestureDetector(
+                        onTap: () {
+                          ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
+                        },
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(MyColors.orange1), width: 3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 3,
+                                offset: const Offset(0, 0),
+                              ),
+                            ],
+                          ),
+                          child: Align(
+                            child: Lottie.asset('assets/lottie/resize_done.json',
+                                addRepaintBoundary: true, repeat: true, width: 50, height: 50),
+                          ),
+                        ),
+                      )),
             ],
           ),
         ),
@@ -563,6 +618,159 @@ class ImagePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
+  }
+}
+
+class CanvasAreaSelector extends HookConsumerWidget {
+  final double resizeRate;
+  final Size imageSize;
+  const CanvasAreaSelector({
+    super.key,
+    required this.resizeRate,
+    required this.imageSize,
+  });
+
+  double get minSize => 150 * resizeRate;
+
+  bool updateValidate(AreaModel area) {
+    if (area.secondPointX > imageSize.width) return false;
+    if (area.secondPointY > imageSize.height) return false;
+    if (area.firstPointX < 0) return false;
+    if (area.firstPointY < 0) return false;
+    if ((area.firstPointX - area.secondPointX).abs() < minSize) return false;
+    if ((area.firstPointY - area.secondPointY).abs() < minSize) return false;
+    return true;
+  }
+
+  Widget areaSelectPointer(BuildContext context) {
+    return Container(
+      color: Colors.transparent,
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+            border: Border.all(color: const Color(MyColors.red1), width: 3),
+            color: Theme.of(context).primaryColor,
+            shape: BoxShape.circle),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final replaceFormat = ref.watch(replaceFormatStateProvider);
+
+    return replaceFormat.canvasArea != null
+        ? Container(
+            color: Colors.transparent,
+            width: imageSize.width / resizeRate,
+            height: imageSize.height / resizeRate,
+            child: Stack(
+              children: [
+                Positioned(
+                  top: replaceFormat.canvasArea!.firstPointY / resizeRate,
+                  left: replaceFormat.canvasArea!.firstPointX / resizeRate,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(color: const Color(MyColors.red1), width: 3),
+                    ),
+                    width: replaceFormat.canvasArea!.secondPointX / resizeRate -
+                        replaceFormat.canvasArea!.firstPointX / resizeRate,
+                    height: replaceFormat.canvasArea!.secondPointY / resizeRate -
+                        replaceFormat.canvasArea!.firstPointY / resizeRate,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          child: GestureDetector(
+                            onPanUpdate: (detail) {
+                              final scale = Platform.isAndroid ? 3.0 : 1.0;
+                              final dx = detail.delta.dx * scale;
+                              final dy = detail.delta.dy * scale;
+                              final updateArea = AreaModel(
+                                firstPointX: replaceFormat.canvasArea!.firstPointX + dx * resizeRate,
+                                firstPointY: replaceFormat.canvasArea!.firstPointY + dy * resizeRate,
+                                secondPointX: replaceFormat.canvasArea!.secondPointX,
+                                secondPointY: replaceFormat.canvasArea!.secondPointY,
+                              );
+                              if (!updateValidate(updateArea)) return;
+                              ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
+                            },
+                            child: areaSelectPointer(context),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onPanUpdate: (detail) {
+                              final scale = Platform.isAndroid ? 3.0 : 1.0;
+                              final dx = detail.delta.dx * scale;
+                              final dy = detail.delta.dy * scale;
+                              final updateArea = AreaModel(
+                                firstPointX: replaceFormat.canvasArea!.firstPointX,
+                                firstPointY: replaceFormat.canvasArea!.firstPointY + dy * resizeRate,
+                                secondPointX: replaceFormat.canvasArea!.secondPointX + dx * resizeRate,
+                                secondPointY: replaceFormat.canvasArea!.secondPointY,
+                              );
+                              if (!updateValidate(updateArea)) return;
+                              ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
+                            },
+                            child: areaSelectPointer(context),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          child: GestureDetector(
+                            onPanUpdate: (detail) {
+                              final scale = Platform.isAndroid ? 3.0 : 1.0;
+                              final dx = detail.delta.dx * scale;
+                              final dy = detail.delta.dy * scale;
+                              final updateArea = AreaModel(
+                                firstPointX: replaceFormat.canvasArea!.firstPointX + dx * resizeRate,
+                                firstPointY: replaceFormat.canvasArea!.firstPointY,
+                                secondPointX: replaceFormat.canvasArea!.secondPointX,
+                                secondPointY: replaceFormat.canvasArea!.secondPointY + dy * resizeRate,
+                              );
+                              if (!updateValidate(updateArea)) return;
+                              ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
+                            },
+                            child: areaSelectPointer(context),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onPanUpdate: (detail) {
+                              final scale = Platform.isAndroid ? 3.0 : 1.0;
+                              final dx = detail.delta.dx * scale;
+                              final dy = detail.delta.dy * scale;
+                              final updateArea = AreaModel(
+                                firstPointX: replaceFormat.canvasArea!.firstPointX,
+                                firstPointY: replaceFormat.canvasArea!.firstPointY,
+                                secondPointX: replaceFormat.canvasArea!.secondPointX + dx * resizeRate,
+                                secondPointY: replaceFormat.canvasArea!.secondPointY + dy * resizeRate,
+                              );
+                              if (!updateValidate(updateArea)) return;
+                              ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
+                            },
+                            child: areaSelectPointer(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        : const SizedBox.shrink();
   }
 }
 
@@ -628,7 +836,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: Theme.of(context).primaryColor,
-                                          border: Border.all(color: const Color(MyColors.orange1), width: 2)),
+                                          border: Border.all(color: const Color(MyColors.orange1), width: 3)),
                                       child: slideAnimationController.isCompleted
                                           ? const Icon(Icons.arrow_forward, color: Color(MyColors.orange1), size: 32)
                                           : const Icon(Icons.arrow_back, color: Color(MyColors.orange1), size: 32),
@@ -642,7 +850,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                         decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: Theme.of(context).primaryColor,
-                                            border: Border.all(color: const Color(MyColors.orange1), width: 2)),
+                                            border: Border.all(color: const Color(MyColors.orange1), width: 3)),
                                         child: Text(list.length.toString(),
                                             style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)))),
                                   )
