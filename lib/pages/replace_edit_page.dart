@@ -35,7 +35,6 @@ class ReplaceEditPage extends HookConsumerWidget {
     final movedPosition = useState<Offset>(Offset.zero);
     final temporaryArea = useState<AreaModel?>(null); // before move
     final selectedArea = useState<AreaModel?>(null); // after move
-    final canvasArea = useState<AreaModel?>(null);
     final lottieController = useAnimationController(duration: const Duration(milliseconds: 2000), initialValue: 1);
     final currentMode = ref.watch(replaceEditStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
@@ -44,9 +43,6 @@ class ReplaceEditPage extends HookConsumerWidget {
     final replaceCheckData = ref.watch(checkReplaceDataStateProvider);
     final displaySizeRate = useState(1.0); // 画像が画面がへoverflowした場合に小さくする用
     final imageSizeConvertRate = useState(1.0); // pickImage width / display width
-
-    final Offset imageArea =
-        pickImage != null ? Offset(w, pickImage.image.height / pickImage.image.width * w) : Offset.zero;
 
     void resetToNextArea() {
       temporaryFirstPoint.value = null;
@@ -430,7 +426,10 @@ class ReplaceEditPage extends HookConsumerWidget {
                                       lottieController.forward();
                                       handleChangeMode();
                                     },
-                                    child: Lottie.asset('assets/lottie/area.json',
+                                    child: Lottie.asset(
+                                        Theme.of(context).primaryColor == const Color(MyColors.light)
+                                            ? 'assets/lottie/area.json'
+                                            : 'assets/lottie/area_dark.json',
                                         controller: lottieController,
                                         addRepaintBoundary: true,
                                         repeat: false,
@@ -442,7 +441,10 @@ class ReplaceEditPage extends HookConsumerWidget {
                                       lottieController.forward();
                                       handleChangeMode();
                                     },
-                                    child: Lottie.asset('assets/lottie/move.json',
+                                    child: Lottie.asset(
+                                        Theme.of(context).primaryColor == const Color(MyColors.light)
+                                            ? 'assets/lottie/move.json'
+                                            : 'assets/lottie/move_dark.json',
                                         controller: lottieController,
                                         addRepaintBoundary: true,
                                         repeat: false,
@@ -507,7 +509,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                               child: Column(
                                 children: [
                                   Text(
-                                    ReplaceEditMode.canvasSelect.modeName,
+                                    currentMode.modeName,
                                     style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
                                   ),
                                   Text(
@@ -527,7 +529,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                               child: Column(
                                 children: [
                                   Text(
-                                    ReplaceEditMode.canvasSelect.modeName,
+                                    currentMode.modeName,
                                     style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
                                   ),
                                   Text(
