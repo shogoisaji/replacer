@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:replacer/models/area_model/area_model.dart';
 import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/models/replace_format/replace_format.dart';
@@ -55,6 +57,17 @@ class ReplaceFormatState extends _$ReplaceFormatState {
       replaceDataList: state.replaceDataList,
       createdAt: state.createdAt,
       canvasArea: canvasArea,
+    );
+  }
+
+  void setThumbnailImage(Uint8List thumbnailImage) {
+    state = ReplaceFormat(
+      formatId: state.formatId,
+      formatName: state.formatName,
+      thumbnailImage: thumbnailImage,
+      replaceDataList: state.replaceDataList,
+      createdAt: state.createdAt,
+      canvasArea: state.canvasArea,
     );
   }
 }

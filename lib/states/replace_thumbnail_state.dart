@@ -10,7 +10,6 @@ class ReplaceThumbnailState extends _$ReplaceThumbnailState {
 
   void addThumbnail(Uint8List thumbnail) {
     state = [...state, thumbnail];
-    print('addThumbnail: ${state.length}');
   }
 
   void removeThumbnail(int index) {

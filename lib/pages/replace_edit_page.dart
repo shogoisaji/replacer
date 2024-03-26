@@ -53,7 +53,6 @@ class ReplaceEditPage extends HookConsumerWidget {
       movedPosition.value = Offset.zero;
       ref.read(checkReplaceDataStateProvider.notifier).clear();
       ref.read(captureScreenStateProvider.notifier).clear();
-      print('resetToNextAre : ${replaceFormatData.canvasArea}');
     }
 
     void resetAll() {
@@ -521,8 +520,8 @@ class ReplaceEditPage extends HookConsumerWidget {
                       /// current mode label
                       pickImage != null
                           ? Positioned(
-                              top: 20,
-                              right: 20,
+                              top: 10,
+                              right: 10,
                               child: currentMode != ReplaceEditMode.canvasSelect
                                   ? Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

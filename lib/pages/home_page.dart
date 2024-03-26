@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:replacer/models/replace_format/replace_format.dart';
+import 'package:replacer/repositories/shared_preferences/shared_preferences_key.dart';
+import 'package:replacer/repositories/shared_preferences/shared_preferences_repository.dart';
 import 'package:replacer/repositories/sqflite/sqflite_repository.dart';
 import 'package:replacer/states/saved_format_list_state.dart';
 import 'package:replacer/states/settings_state.dart';
@@ -17,6 +19,7 @@ class HomePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formatList = ref.watch(savedFormatListStateProvider);
+    final currentMode = ref.watch(settingsStateProvider);
 
     final menuItems = [
       {'title': 'License', 'func': () => context.go('/license')},
@@ -25,9 +28,11 @@ class HomePage extends HookConsumerWidget {
         'func': () {
           if (ref.read(settingsStateProvider).themeMode == ThemeMode.dark) {
             ref.read(settingsStateProvider.notifier).changeToLightMode();
+            ref.read(sharedPreferencesRepositoryProvider).saveIsDarkMode(SharedPreferencesKey.isDarkMode, false);
             return;
           }
           ref.read(settingsStateProvider.notifier).changeToDarkMode();
+          ref.read(sharedPreferencesRepositoryProvider).saveIsDarkMode(SharedPreferencesKey.isDarkMode, true);
         },
       }
     ];
@@ -46,9 +51,22 @@ class HomePage extends HookConsumerWidget {
       fetchFormatList();
     }
 
+    void fetchIsDarkMode() {
+      final isDarkMode = ref.read(sharedPreferencesRepositoryProvider).fetchIsDarkMode(SharedPreferencesKey.isDarkMode);
+      if (isDarkMode == null) return;
+      if (isDarkMode) {
+        if (currentMode.themeMode == ThemeMode.dark) return;
+        ref.read(settingsStateProvider.notifier).changeToDarkMode();
+      } else {
+        if (currentMode.themeMode == ThemeMode.light) return;
+        ref.read(settingsStateProvider.notifier).changeToLightMode();
+      }
+    }
+
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         fetchFormatList();
+        fetchIsDarkMode();
       });
       return null;
     }, []);
@@ -186,7 +204,7 @@ class HomePage extends HookConsumerWidget {
                                   onLongPress: () async {
                                     deleteFormat(formatList[index].formatId);
                                   },
-                                  child: _gridItem(formatList[index], context));
+                                  child: gridItem(formatList[index], context));
                             },
                             childCount: formatList.length,
                           ),
@@ -204,7 +222,7 @@ class HomePage extends HookConsumerWidget {
     );
   }
 
-  Widget _gridItem(ReplaceFormat format, BuildContext context) {
+  Widget gridItem(ReplaceFormat format, BuildContext context) {
     return Container(
       height: 200,
       margin: const EdgeInsets.only(top: 12),
@@ -232,9 +250,12 @@ class HomePage extends HookConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: format.thumbnailImage != null
-                        ? Image.memory(
-                            format.thumbnailImage!,
-                            fit: BoxFit.cover,
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.memory(
+                              format.thumbnailImage!,
+                              fit: BoxFit.cover,
+                            ),
                           )
                         : Center(
                             child: Column(

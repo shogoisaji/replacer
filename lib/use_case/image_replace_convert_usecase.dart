@@ -28,6 +28,11 @@ class ImageReplaceConvertUseCase {
     final canvas = Canvas(recorder);
     final paint = Paint();
 
+    canvas.translate(-format.canvasArea!.firstPointX, -format.canvasArea!.firstPointY);
+
+    canvas.clipRect(Rect.fromPoints(Offset(format.canvasArea!.firstPointX, format.canvasArea!.firstPointY),
+        Offset(format.canvasArea!.secondPointX, format.canvasArea!.secondPointY)));
+
     canvas.drawImage(image, Offset.zero, paint);
 
     for (final clippedImageData in clippedImageDataList) {
@@ -37,9 +42,12 @@ class ImageReplaceConvertUseCase {
       final dst = Rect.fromLTWH(dstOffset.dx, dstOffset.dy, imageSize.width, imageSize.height);
       canvas.drawImageRect(clippedImageData.image, src, dst, paint);
     }
-
+    Size((format.canvasArea!.firstPointX - format.canvasArea!.secondPointX).abs(),
+        (format.canvasArea!.firstPointY - format.canvasArea!.secondPointY).abs());
     final picture = recorder.endRecording();
-    final combinedImage = await picture.toImage((image.width).toInt(), (image.height).toInt());
+    final combinedImage = await picture.toImage(
+        (format.canvasArea!.firstPointX - format.canvasArea!.secondPointX).abs().toInt(),
+        (format.canvasArea!.firstPointY - format.canvasArea!.secondPointY).abs().toInt());
     final byteData = await combinedImage.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }

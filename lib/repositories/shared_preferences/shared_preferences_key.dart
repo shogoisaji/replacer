@@ -1,5 +1,5 @@
 enum SharedPreferencesKey {
-  reservation('reservation'), // 仮
+  isDarkMode('isDarkMode'),
   ;
 
   const SharedPreferencesKey(this.value);

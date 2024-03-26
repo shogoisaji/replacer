@@ -38,7 +38,6 @@ class ImagePickUseCase {
     if (image != null) {
       int width = image.width;
       int height = image.height;
-      print('画像のサイズ: 幅 $width x 高さ $height');
       return Size(width.toDouble(), height.toDouble());
     } else {
       print('画像をデコードできませんでした。');

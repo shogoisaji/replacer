@@ -45,7 +45,7 @@ class MaskPaint extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Path path = Path();
     Paint paint = Paint()
-      ..color = const Color(MyColors.orange2).withOpacity(0.7)
+      ..color = const Color(MyColors.orange2).withOpacity(0.5)
       ..style = PaintingStyle.fill;
     path.moveTo(0, 0);
     path.lineTo(imageSize.width / resizeRate, 0);
