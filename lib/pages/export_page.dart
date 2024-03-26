@@ -134,7 +134,6 @@ class ExportPage extends HookConsumerWidget {
     final w = MediaQuery.sizeOf(context).width;
 
     Future<void> handleSaveFormat() async {
-      // Save format
       final currentFormat = ref.watch(replaceFormatStateProvider);
       final sqfliteRepository = SqfliteRepository.instance;
       final result = await sqfliteRepository.insertFormat(currentFormat);

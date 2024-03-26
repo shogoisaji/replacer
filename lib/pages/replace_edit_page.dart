@@ -70,22 +70,6 @@ class ReplaceEditPage extends HookConsumerWidget {
       ref.read(replaceFormatStateProvider.notifier).replaceDataReset();
     }
 
-    void handleFirstTapImage(details) {
-      ref.read(checkReplaceDataStateProvider.notifier).clear();
-      if (currentMode == ReplaceEditMode.moveSelect) return;
-      temporaryFirstPoint.value = details.localPosition * imageSizeConvertRate.value;
-    }
-
-    void handleAreaSelect(details) {
-      if (currentMode == ReplaceEditMode.moveSelect) return;
-      temporaryArea.value = AreaModel(
-        firstPointX: temporaryFirstPoint.value!.dx,
-        firstPointY: temporaryFirstPoint.value!.dy,
-        secondPointX: details.localPosition.dx * imageSizeConvertRate.value,
-        secondPointY: details.localPosition.dy * imageSizeConvertRate.value,
-      );
-    }
-
     void handlePickImage() async {
       final result = await ref.read(imagePickUseCaseProvider).pickImage();
       if (!result) return;
@@ -120,14 +104,29 @@ class ReplaceEditPage extends HookConsumerWidget {
       if (pickImage == null) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setPickImageAspectRatio();
+        imageSizeConvertRate.value = pickImage.image.width / w / displaySizeRate.value;
       });
-
-      imageSizeConvertRate.value = pickImage.image.width / w / displaySizeRate.value;
 
       return null;
     }, [pickImage]);
 
-    void handleOnPanUpdate(details) {
+    void handleFirstPointSelect(details) {
+      ref.read(checkReplaceDataStateProvider.notifier).clear();
+      if (currentMode == ReplaceEditMode.moveSelect) return;
+      temporaryFirstPoint.value = details.localPosition * imageSizeConvertRate.value;
+    }
+
+    void handleSecondPointSelect(details) {
+      if (currentMode == ReplaceEditMode.moveSelect) return;
+      temporaryArea.value = AreaModel(
+        firstPointX: temporaryFirstPoint.value!.dx,
+        firstPointY: temporaryFirstPoint.value!.dy,
+        secondPointX: details.localPosition.dx * imageSizeConvertRate.value,
+        secondPointY: details.localPosition.dy * imageSizeConvertRate.value,
+      );
+    }
+
+    void handleSelectedAreaDrag(details) {
       temporaryArea.value = AreaModel(
         firstPointX: temporaryArea.value!.firstPointX + details.delta.dx * imageSizeConvertRate.value,
         firstPointY: temporaryArea.value!.firstPointY + details.delta.dy * imageSizeConvertRate.value,
@@ -142,16 +141,25 @@ class ReplaceEditPage extends HookConsumerWidget {
         resetToNextArea();
       } else {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
+
+        /// 選択したAreaを保存
         selectedArea.value = temporaryArea.value;
+
+        /// 移動前の初期値を代入
         movedPosition.value = Offset(
           min(temporaryArea.value!.firstPointX, temporaryArea.value!.secondPointX),
           min(temporaryArea.value!.firstPointY, temporaryArea.value!.secondPointY),
         );
 
-        if (pickImage == null) return;
+        /// 一時的なClipImageの範囲を設定
         final Rect rect = Rect.fromPoints(Offset(selectedArea.value!.firstPointX, selectedArea.value!.firstPointY),
             Offset(selectedArea.value!.secondPointX, selectedArea.value!.secondPointY));
-
+        // final Rect rect = Rect.fromPoints(
+        //     Offset(selectedArea.value!.firstPointX / displaySizeRate.value,
+        //         selectedArea.value!.firstPointY / displaySizeRate.value),
+        //     Offset(selectedArea.value!.secondPointX / displaySizeRate.value,
+        //         selectedArea.value!.secondPointY / displaySizeRate.value));
+        if (pickImage == null) return;
         ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
       }
     }
@@ -244,233 +252,238 @@ class ReplaceEditPage extends HookConsumerWidget {
         ],
         title: Text('Replace Edit', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          children: [
-            pickImage == null
-                ? const SizedBox()
-                : Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Container(
-                      color: Colors.red,
-                      width: w * displaySizeRate.value,
-                      height: pickImage.image.height / pickImage.image.width * w * displaySizeRate.value,
-                      child: CustomPaint(
-                        painter: ImagePainter(pickImage.image),
+      body: PopScope(
+        canPop: false,
+        child: SafeArea(
+          bottom: false,
+          child: Stack(
+            children: [
+              pickImage == null
+                  ? const SizedBox.shrink()
+                  : Positioned(
+                      top: 0,
+                      left: 0,
+                      child: SizedBox(
+                        width: w * displaySizeRate.value,
+                        height: pickImage.image.height / pickImage.image.width * w * displaySizeRate.value,
+                        child: CustomPaint(
+                          painter: ImagePainter(pickImage.image),
+                        ),
                       ),
                     ),
-                  ),
-            GestureDetector(
-              onPanStart: (details) {
-                handleFirstTapImage(details);
-              },
-              onPanUpdate: (details) {
-                handleAreaSelect(details);
-              },
-              child: Container(
-                width: w,
-                height: imageArea.dy,
-                color: Colors.transparent,
-              ),
-            ),
-
-            /// replace date check widget
-            replaceCheckData != null
-                ? AreaSelectWidget(
-                    area: replaceCheckData.area,
-                    color: Colors.green,
-                    isSelected: false,
-                    resizeRate: imageSizeConvertRate.value,
-                  )
-                : const SizedBox(),
-            replaceCheckData != null
-                ? AreaSelectWidget(
-                    area: convertMovedAreaForCheck(), // TODO
-                    color: Colors.green,
-                    isSelected: true,
-                    resizeRate: imageSizeConvertRate.value,
-                  )
-                : const SizedBox(),
-
-            /// selectable area
-            GestureDetector(
-              onPanUpdate: (details) {
-                handleOnPanUpdate(details);
-              },
-              child: AreaSelectWidget(
-                area: temporaryArea.value ?? const AreaModel(),
-                color: const Color(MyColors.orange1),
-                isSelected: currentMode == ReplaceEditMode.moveSelect,
-                resizeRate: imageSizeConvertRate.value,
-              ),
-            ),
-
-            /// キャプチャした画像
-            captureImage != null && pickImage != null && selectedArea.value != null
-                ? Positioned(
-                    top: movedPosition.value.dy / imageSizeConvertRate.value,
-                    left: movedPosition.value.dx / imageSizeConvertRate.value,
-                    child: GestureDetector(
+              pickImage == null
+                  ? const SizedBox.shrink()
+                  : GestureDetector(
+                      onPanStart: (details) {
+                        handleFirstPointSelect(details);
+                      },
                       onPanUpdate: (details) {
-                        movedPosition.value = Offset(
-                          movedPosition.value.dx + details.delta.dx * imageSizeConvertRate.value,
-                          movedPosition.value.dy + details.delta.dy * imageSizeConvertRate.value,
-                        );
+                        handleSecondPointSelect(details);
                       },
                       child: Container(
+                        width: w * displaySizeRate.value,
+                        height: pickImage.image.height / pickImage.image.width * w * displaySizeRate.value,
+                        color: Colors.transparent,
+                      ),
+                    ),
+
+              /// replace date check widget
+              replaceCheckData != null
+                  ? AreaSelectWidget(
+                      area: replaceCheckData.area,
+                      color: Colors.green,
+                      isSelected: false,
+                      resizeRate: imageSizeConvertRate.value,
+                    )
+                  : const SizedBox(),
+              replaceCheckData != null
+                  ? AreaSelectWidget(
+                      area: convertMovedAreaForCheck(), // TODO
+                      color: Colors.green,
+                      isSelected: true,
+                      resizeRate: imageSizeConvertRate.value,
+                    )
+                  : const SizedBox(),
+
+              /// selectable area
+              GestureDetector(
+                onPanUpdate: (details) {
+                  handleSelectedAreaDrag(details);
+                },
+                child: AreaSelectWidget(
+                  area: temporaryArea.value ?? const AreaModel(),
+                  color: const Color(MyColors.orange1),
+                  isSelected: currentMode == ReplaceEditMode.moveSelect,
+                  resizeRate: imageSizeConvertRate.value,
+                ),
+              ),
+
+              /// キャプチャした画像
+              captureImage != null && pickImage != null && selectedArea.value != null
+                  ? Positioned(
+                      top: movedPosition.value.dy / imageSizeConvertRate.value,
+                      left: movedPosition.value.dx / imageSizeConvertRate.value,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          movedPosition.value = Offset(
+                            movedPosition.value.dx + details.delta.dx * imageSizeConvertRate.value,
+                            movedPosition.value.dy + details.delta.dy * imageSizeConvertRate.value,
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.6),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs() /
+                              imageSizeConvertRate.value,
+                          height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs() /
+                              imageSizeConvertRate.value,
+                          child: CustomPaint(
+                            painter: ImagePainter(captureImage),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(),
+
+              /// replace data list
+              replaceFormatData.replaceDataList.isNotEmpty
+                  ? Positioned(
+                      bottom: 100, left: 0, child: ReplaceDataListView(list: replaceFormatData.replaceDataList))
+                  : const SizedBox(),
+
+              /// 下のプラスボタン
+              pickImage == null
+                  ? Positioned(
+                      bottom: 50,
+                      right: 50,
+                      child: GestureDetector(
+                        onTap: () {
+                          handlePickImage();
+                        },
+                        child: SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: Lottie.asset(
+                              'assets/lottie/add.json',
+                              repeat: true,
+                              addRepaintBoundary: true,
+                            )),
+                      ))
+                  : const SizedBox(),
+
+              /// 下のモードチェンジボタン
+              pickImage != null
+                  ? Positioned(
+                      bottom: 20,
+                      right: 20,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.6),
-                              spreadRadius: 1,
-                              blurRadius: 3,
-                              offset: const Offset(0, 2),
-                            ),
+                          color: const Color(MyColors.orange1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            currentMode == ReplaceEditMode.areaSelect
+                                ? GestureDetector(
+                                    onTap: () {
+                                      if (temporaryArea.value == null) return;
+                                      lottieController.reset();
+                                      lottieController.forward();
+                                      handleChangeMode();
+                                    },
+                                    child: Lottie.asset('assets/lottie/area.json',
+                                        controller: lottieController,
+                                        addRepaintBoundary: true,
+                                        repeat: false,
+                                        width: 50,
+                                        height: 50))
+                                : GestureDetector(
+                                    onTap: () {
+                                      lottieController.reset();
+                                      lottieController.forward();
+                                      handleChangeMode();
+                                    },
+                                    child: Lottie.asset('assets/lottie/move.json',
+                                        controller: lottieController,
+                                        addRepaintBoundary: true,
+                                        repeat: false,
+                                        width: 50,
+                                        height: 50)),
+                            const SizedBox(width: 24),
+                            IconButton(
+                                onPressed: () {
+                                  handleMovedSave();
+                                },
+                                icon: FaIcon(
+                                  FontAwesomeIcons.check,
+                                  color: Theme.of(context).primaryColor,
+                                  size: 40,
+                                ))
                           ],
                         ),
-                        width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs() /
-                            imageSizeConvertRate.value,
-                        height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs() /
-                            imageSizeConvertRate.value,
-                        child: CustomPaint(
-                          painter: ImagePainter(captureImage),
-                        ),
                       ),
-                    ),
-                  )
-                : const SizedBox(),
+                    )
+                  : const SizedBox(),
 
-            /// replace data list
-            replaceFormatData.replaceDataList.isNotEmpty
-                ? Positioned(bottom: 100, left: 0, child: ReplaceDataListView(list: replaceFormatData.replaceDataList))
-                : const SizedBox(),
-
-            /// 下のプラスボタン
-            pickImage == null
-                ? Positioned(
-                    bottom: 50,
-                    right: 50,
-                    child: GestureDetector(
-                      onTap: () {
-                        handlePickImage();
-                      },
-                      child: SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: Lottie.asset(
-                            'assets/lottie/add.json',
-                            repeat: true,
-                            addRepaintBoundary: true,
-                          )),
-                    ))
-                : const SizedBox(),
-
-            /// 下のモードチェンジボタン
-            pickImage != null
-                ? Positioned(
-                    bottom: 20,
-                    right: 20,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(MyColors.orange1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          currentMode == ReplaceEditMode.areaSelect
-                              ? GestureDetector(
-                                  onTap: () {
-                                    if (temporaryArea.value == null) return;
-                                    lottieController.reset();
-                                    lottieController.forward();
-                                    handleChangeMode();
-                                  },
-                                  child: Lottie.asset('assets/lottie/area.json',
-                                      controller: lottieController,
-                                      addRepaintBoundary: true,
-                                      repeat: false,
-                                      width: 50,
-                                      height: 50))
-                              : GestureDetector(
-                                  onTap: () {
-                                    lottieController.reset();
-                                    lottieController.forward();
-                                    handleChangeMode();
-                                  },
-                                  child: Lottie.asset('assets/lottie/move.json',
-                                      controller: lottieController,
-                                      addRepaintBoundary: true,
-                                      repeat: false,
-                                      width: 50,
-                                      height: 50)),
-                          const SizedBox(width: 24),
-                          IconButton(
-                              onPressed: () {
-                                handleMovedSave();
-                              },
-                              icon: FaIcon(
-                                FontAwesomeIcons.check,
-                                color: Theme.of(context).primaryColor,
-                                size: 40,
+              /// current mode label
+              pickImage != null
+                  ? Positioned(
+                      bottom: 20,
+                      left: 20,
+                      child: currentMode == ReplaceEditMode.areaSelect
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(MyColors.orange1),
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Select Area',
+                                    style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
+                                  ),
+                                  Text(
+                                    'Mode',
+                                    style: MyTextStyles.small.copyWith(color: Theme.of(context).primaryColor),
+                                  ),
+                                  const SizedBox(height: 3),
+                                ],
                               ))
-                        ],
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
-
-            /// current mode label
-            pickImage != null
-                ? Positioned(
-                    bottom: 20,
-                    left: 20,
-                    child: currentMode == ReplaceEditMode.areaSelect
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(MyColors.orange1),
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Select Area',
-                                  style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
-                                ),
-                                Text(
-                                  'Mode',
-                                  style: MyTextStyles.small.copyWith(color: Theme.of(context).primaryColor),
-                                ),
-                                const SizedBox(height: 3),
-                              ],
-                            ))
-                        : Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(color: const Color(MyColors.orange1), width: 2.5),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Move Area',
-                                  style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
-                                ),
-                                Text(
-                                  'Mode',
-                                  style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)),
-                                ),
-                                const SizedBox(height: 3),
-                              ],
-                            )),
-                  )
-                : const SizedBox(),
-          ],
+                          : Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(color: const Color(MyColors.orange1), width: 2.5),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Move Area',
+                                    style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
+                                  ),
+                                  Text(
+                                    'Mode',
+                                    style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)),
+                                  ),
+                                  const SizedBox(height: 3),
+                                ],
+                              )),
+                    )
+                  : const SizedBox(),
+            ],
+          ),
         ),
       ),
     );
