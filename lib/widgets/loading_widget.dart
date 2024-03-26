@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:replacer/states/loading_state.dart';
-import 'package:replacer/theme/color_theme.dart';
 
 class LoadingWidget extends HookConsumerWidget {
   const LoadingWidget({super.key});
@@ -28,7 +27,7 @@ class LoadingWidget extends HookConsumerWidget {
             builder: (context, child) => Opacity(
               opacity: animation.value,
               child: Container(
-                color: const Color(MyColors.light),
+                color: Theme.of(context).primaryColor,
                 child: Center(
                   child: Lottie.asset(
                     'assets/lottie/load.json',

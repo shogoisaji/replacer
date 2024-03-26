@@ -44,10 +44,10 @@ class ExportPage extends HookConsumerWidget {
     }, []);
 
     return Scaffold(
-      backgroundColor: const Color(MyColors.light),
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         backgroundColor: const Color(MyColors.orange1),
-        title: Text('Replaced Image', style: MyTextStyles.subtitle),
+        title: Text('Replaced Image', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
         leading: const SizedBox(),
       ),
       body: SafeArea(
@@ -86,7 +86,8 @@ class ExportPage extends HookConsumerWidget {
                       );
                     } else {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Failed to save image', false));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(customSnackBar('Failed to save image', false, context));
                       }
                     }
                   },
@@ -95,11 +96,11 @@ class ExportPage extends HookConsumerWidget {
                       decoration: BoxDecoration(
                         color: const Color(MyColors.orange1),
                         borderRadius: BorderRadius.circular(100),
-                        border: Border.all(color: const Color(MyColors.light), width: 2),
+                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
                       ),
                       child: Column(
                         children: [
-                          Text('Save', style: MyTextStyles.largeBodyLight),
+                          Text('Save', style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)),
                         ],
                       )),
                 )),
@@ -113,13 +114,13 @@ class ExportPage extends HookConsumerWidget {
                   child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(MyColors.light),
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(100),
                         border: Border.all(color: const Color(MyColors.orange1), width: 2),
                       ),
                       child: Column(
                         children: [
-                          Text('Back', style: MyTextStyles.largeBodyOrange),
+                          Text('Back', style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1))),
                         ],
                       )),
                 )),
@@ -133,7 +134,6 @@ class ExportPage extends HookConsumerWidget {
     final w = MediaQuery.sizeOf(context).width;
 
     Future<void> handleSaveFormat() async {
-      // Save format
       final currentFormat = ref.watch(replaceFormatStateProvider);
       final sqfliteRepository = SqfliteRepository.instance;
       final result = await sqfliteRepository.insertFormat(currentFormat);
@@ -141,13 +141,13 @@ class ExportPage extends HookConsumerWidget {
         if (context.mounted) {
           ref.read(savedFormatListStateProvider.notifier).fetchFormatList();
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Successfully saved Format', false));
+          ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Successfully saved Format', false, context));
           context.go('/');
         }
       } else {
         if (context.mounted) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Error saving Format', true));
+          ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Error saving Format', true, context));
         }
       }
     }
@@ -160,7 +160,7 @@ class ExportPage extends HookConsumerWidget {
         width: w * 0.8,
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
         decoration: BoxDecoration(
-          color: const Color(MyColors.light),
+          color: Theme.of(context).primaryColor,
           border: Border.all(color: const Color(MyColors.orange1), width: 3),
           borderRadius: BorderRadius.circular(20.0),
         ),
@@ -169,7 +169,7 @@ class ExportPage extends HookConsumerWidget {
           children: <Widget>[
             Text(
               '🎉Image saved🎉',
-              style: MyTextStyles.largeBodyOrange,
+              style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1)),
             ),
             const SizedBox(
               height: 8.0,
@@ -192,13 +192,13 @@ class ExportPage extends HookConsumerWidget {
                   child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(MyColors.light),
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(100),
                         border: Border.all(color: const Color(MyColors.orange1), width: 2),
                       ),
                       child: Column(
                         children: [
-                          Text('NoSave', style: MyTextStyles.largeBodyOrange),
+                          Text('NoSave', style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1))),
                         ],
                       )),
                 ),
@@ -214,11 +214,11 @@ class ExportPage extends HookConsumerWidget {
                       decoration: BoxDecoration(
                         color: const Color(MyColors.orange1),
                         borderRadius: BorderRadius.circular(100),
-                        border: Border.all(color: const Color(MyColors.light), width: 2),
+                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
                       ),
                       child: Column(
                         children: [
-                          Text('Save', style: MyTextStyles.largeBodyLight),
+                          Text('Save', style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)),
                         ],
                       )),
                 ),
