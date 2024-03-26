@@ -15,6 +15,9 @@ _$ReplaceFormatImpl _$$ReplaceFormatImplFromJson(Map<String, dynamic> json) =>
       replaceDataList: (json['replaceDataList'] as List<dynamic>)
           .map((e) => ReplaceData.fromJson(e as Map<String, dynamic>))
           .toList(),
+      canvasArea: json['canvasArea'] == null
+          ? null
+          : AreaModel.fromJson(json['canvasArea'] as Map<String, dynamic>),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
@@ -25,5 +28,6 @@ Map<String, dynamic> _$$ReplaceFormatImplToJson(_$ReplaceFormatImpl instance) =>
       'thumbnailImage':
           const Uint8ListConverter().toJson(instance.thumbnailImage),
       'replaceDataList': instance.replaceDataList,
+      'canvasArea': instance.canvasArea,
       'createdAt': instance.createdAt.toIso8601String(),
     };

@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class SqfliteRepository {
-  static const _databaseName = "sqflite_Database3.db";
+  static const _databaseName = "sqflite_Database5.db";
   static const _databaseVersion = 1;
   static const formatTable = 'formatTable';
 
@@ -15,6 +15,7 @@ class SqfliteRepository {
   static const thumbnailImage = 'thumbnailImage';
   static const replaceDataList = 'replaceDataList';
   static const createdAt = 'createdAt';
+  static const canvasArea = 'canvasArea';
 
   SqfliteRepository._();
   static final SqfliteRepository instance = SqfliteRepository._();
@@ -38,7 +39,8 @@ class SqfliteRepository {
             $formatName TEXT NOT NULL,
             $thumbnailImage BLOB,
             $replaceDataList TEXT NOT NULL,
-            $createdAt TEXT NOT NULL
+            $createdAt TEXT NOT NULL,
+            $canvasArea TEXT
           )
           ''');
   }
@@ -73,6 +75,7 @@ class SqfliteRepository {
         thumbnailImage: format.thumbnailImage,
         replaceDataList: encodeReplaceDataList(format.replaceDataList),
         createdAt: format.createdAt.toIso8601String(),
+        canvasArea: format.canvasArea?.toJson(),
       };
       int result = await db.insert(formatTable, row);
       print('データベースへの挿入が成功しました : $row');
@@ -126,6 +129,7 @@ class SqfliteRepository {
         thumbnailImage: map[thumbnailImage],
         replaceDataList: decodedReplaceDataList,
         createdAt: DateTime.parse(map[createdAt]),
+        canvasArea: map[canvasArea],
       );
       return format;
     } catch (e) {

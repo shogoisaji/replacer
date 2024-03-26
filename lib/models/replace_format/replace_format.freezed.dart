@@ -25,6 +25,7 @@ mixin _$ReplaceFormat {
   @Uint8ListConverter()
   Uint8List? get thumbnailImage => throw _privateConstructorUsedError;
   List<ReplaceData> get replaceDataList => throw _privateConstructorUsedError;
+  AreaModel? get canvasArea => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -44,7 +45,10 @@ abstract class $ReplaceFormatCopyWith<$Res> {
       String formatName,
       @Uint8ListConverter() Uint8List? thumbnailImage,
       List<ReplaceData> replaceDataList,
+      AreaModel? canvasArea,
       DateTime createdAt});
+
+  $AreaModelCopyWith<$Res>? get canvasArea;
 }
 
 /// @nodoc
@@ -64,6 +68,7 @@ class _$ReplaceFormatCopyWithImpl<$Res, $Val extends ReplaceFormat>
     Object? formatName = null,
     Object? thumbnailImage = freezed,
     Object? replaceDataList = null,
+    Object? canvasArea = freezed,
     Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
@@ -83,11 +88,27 @@ class _$ReplaceFormatCopyWithImpl<$Res, $Val extends ReplaceFormat>
           ? _value.replaceDataList
           : replaceDataList // ignore: cast_nullable_to_non_nullable
               as List<ReplaceData>,
+      canvasArea: freezed == canvasArea
+          ? _value.canvasArea
+          : canvasArea // ignore: cast_nullable_to_non_nullable
+              as AreaModel?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ) as $Val);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $AreaModelCopyWith<$Res>? get canvasArea {
+    if (_value.canvasArea == null) {
+      return null;
+    }
+
+    return $AreaModelCopyWith<$Res>(_value.canvasArea!, (value) {
+      return _then(_value.copyWith(canvasArea: value) as $Val);
+    });
   }
 }
 
@@ -104,7 +125,11 @@ abstract class _$$ReplaceFormatImplCopyWith<$Res>
       String formatName,
       @Uint8ListConverter() Uint8List? thumbnailImage,
       List<ReplaceData> replaceDataList,
+      AreaModel? canvasArea,
       DateTime createdAt});
+
+  @override
+  $AreaModelCopyWith<$Res>? get canvasArea;
 }
 
 /// @nodoc
@@ -122,6 +147,7 @@ class __$$ReplaceFormatImplCopyWithImpl<$Res>
     Object? formatName = null,
     Object? thumbnailImage = freezed,
     Object? replaceDataList = null,
+    Object? canvasArea = freezed,
     Object? createdAt = null,
   }) {
     return _then(_$ReplaceFormatImpl(
@@ -141,6 +167,10 @@ class __$$ReplaceFormatImplCopyWithImpl<$Res>
           ? _value._replaceDataList
           : replaceDataList // ignore: cast_nullable_to_non_nullable
               as List<ReplaceData>,
+      canvasArea: freezed == canvasArea
+          ? _value.canvasArea
+          : canvasArea // ignore: cast_nullable_to_non_nullable
+              as AreaModel?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -157,6 +187,7 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
       required this.formatName,
       @Uint8ListConverter() this.thumbnailImage,
       required final List<ReplaceData> replaceDataList,
+      this.canvasArea,
       required this.createdAt})
       : _replaceDataList = replaceDataList;
 
@@ -179,11 +210,13 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
   }
 
   @override
+  final AreaModel? canvasArea;
+  @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'ReplaceFormat(formatId: $formatId, formatName: $formatName, thumbnailImage: $thumbnailImage, replaceDataList: $replaceDataList, createdAt: $createdAt)';
+    return 'ReplaceFormat(formatId: $formatId, formatName: $formatName, thumbnailImage: $thumbnailImage, replaceDataList: $replaceDataList, canvasArea: $canvasArea, createdAt: $createdAt)';
   }
 
   @override
@@ -199,6 +232,8 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
                 .equals(other.thumbnailImage, thumbnailImage) &&
             const DeepCollectionEquality()
                 .equals(other._replaceDataList, _replaceDataList) &&
+            (identical(other.canvasArea, canvasArea) ||
+                other.canvasArea == canvasArea) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -211,6 +246,7 @@ class _$ReplaceFormatImpl implements _ReplaceFormat {
       formatName,
       const DeepCollectionEquality().hash(thumbnailImage),
       const DeepCollectionEquality().hash(_replaceDataList),
+      canvasArea,
       createdAt);
 
   @JsonKey(ignore: true)
@@ -233,6 +269,7 @@ abstract class _ReplaceFormat implements ReplaceFormat {
       required final String formatName,
       @Uint8ListConverter() final Uint8List? thumbnailImage,
       required final List<ReplaceData> replaceDataList,
+      final AreaModel? canvasArea,
       required final DateTime createdAt}) = _$ReplaceFormatImpl;
 
   factory _ReplaceFormat.fromJson(Map<String, dynamic> json) =
@@ -247,6 +284,8 @@ abstract class _ReplaceFormat implements ReplaceFormat {
   Uint8List? get thumbnailImage;
   @override
   List<ReplaceData> get replaceDataList;
+  @override
+  AreaModel? get canvasArea;
   @override
   DateTime get createdAt;
   @override
