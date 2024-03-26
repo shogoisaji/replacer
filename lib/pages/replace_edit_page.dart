@@ -35,6 +35,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     final movedPosition = useState<Offset>(Offset.zero);
     final temporaryArea = useState<AreaModel?>(null); // before move
     final selectedArea = useState<AreaModel?>(null); // after move
+    final canvasArea = useState<AreaModel?>(null);
     final lottieController = useAnimationController(duration: const Duration(milliseconds: 2000), initialValue: 1);
     final currentMode = ref.watch(replaceEditStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
@@ -139,7 +140,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       if (currentMode == ReplaceEditMode.moveSelect) {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
         resetToNextArea();
-      } else {
+      } else if (currentMode == ReplaceEditMode.areaSelect) {
         ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
 
         /// 選択したAreaを保存
@@ -154,14 +155,14 @@ class ReplaceEditPage extends HookConsumerWidget {
         /// 一時的なClipImageの範囲を設定
         final Rect rect = Rect.fromPoints(Offset(selectedArea.value!.firstPointX, selectedArea.value!.firstPointY),
             Offset(selectedArea.value!.secondPointX, selectedArea.value!.secondPointY));
-        // final Rect rect = Rect.fromPoints(
-        //     Offset(selectedArea.value!.firstPointX / displaySizeRate.value,
-        //         selectedArea.value!.firstPointY / displaySizeRate.value),
-        //     Offset(selectedArea.value!.secondPointX / displaySizeRate.value,
-        //         selectedArea.value!.secondPointY / displaySizeRate.value));
         if (pickImage == null) return;
         ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
       }
+    }
+
+    void handleChangeSelectMode() {
+      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.canvasSelect);
+      resetToNextArea();
     }
 
     MoveDelta? convertDeltaAreaModel() {
@@ -330,24 +331,53 @@ class ReplaceEditPage extends HookConsumerWidget {
                             movedPosition.value.dy + details.delta.dy * imageSizeConvertRate.value,
                           );
                         },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.6),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(0, 2),
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.6),
+                                    spreadRadius: 2,
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                  const BoxShadow(
+                                    color: Color(MyColors.orange1),
+                                    spreadRadius: 1,
+                                    blurRadius: 2,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs() /
-                              imageSizeConvertRate.value,
-                          height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs() /
-                              imageSizeConvertRate.value,
-                          child: CustomPaint(
-                            painter: ImagePainter(captureImage),
-                          ),
+                              width: (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs() /
+                                  imageSizeConvertRate.value,
+                              height: (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs() /
+                                  imageSizeConvertRate.value,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: SizedBox(
+                                      width:
+                                          (selectedArea.value!.secondPointX - selectedArea.value!.firstPointX).abs() /
+                                              imageSizeConvertRate.value,
+                                      height:
+                                          (selectedArea.value!.secondPointY - selectedArea.value!.firstPointY).abs() /
+                                              imageSizeConvertRate.value,
+                                      child: CustomPaint(
+                                        painter: ImagePainter(captureImage),
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                      alignment: Alignment.center,
+                                      child: Lottie.asset('assets/lottie/move_arrow.json',
+                                          addRepaintBoundary: true, repeat: true, width: 54, height: 54)),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     )
@@ -434,12 +464,39 @@ class ReplaceEditPage extends HookConsumerWidget {
                     )
                   : const SizedBox(),
 
-              /// current mode label
+              /// canvas area select button
               pickImage != null
                   ? Positioned(
                       bottom: 20,
                       left: 20,
-                      child: currentMode == ReplaceEditMode.areaSelect
+                      child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(MyColors.orange1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: GestureDetector(
+                              onTap: () {
+                                if (temporaryArea.value == null) return;
+                                lottieController.reset();
+                                lottieController.forward();
+                                handleChangeSelectMode();
+                              },
+                              child: Lottie.asset('assets/lottie/area.json',
+                                  controller: lottieController,
+                                  addRepaintBoundary: true,
+                                  repeat: false,
+                                  width: 50,
+                                  height: 50))),
+                    )
+                  : const SizedBox.shrink(),
+
+              /// current mode label
+              pickImage != null
+                  ? Positioned(
+                      top: 20,
+                      right: 20,
+                      child: currentMode != ReplaceEditMode.canvasSelect
                           ? Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
@@ -450,7 +507,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                               child: Column(
                                 children: [
                                   Text(
-                                    'Select Area',
+                                    ReplaceEditMode.canvasSelect.modeName,
                                     style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
                                   ),
                                   Text(
@@ -470,7 +527,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                               child: Column(
                                 children: [
                                   Text(
-                                    'Move Area',
+                                    ReplaceEditMode.canvasSelect.modeName,
                                     style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
                                   ),
                                   Text(
