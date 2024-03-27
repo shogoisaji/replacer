@@ -142,37 +142,6 @@ class ReplaceEditPage extends HookConsumerWidget {
       );
     }
 
-    void handleChangeMode() {
-      if (currentMode == ReplaceEditMode.moveSelect) {
-        ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
-        resetToNextArea();
-      } else if (currentMode == ReplaceEditMode.areaSelect) {
-        ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
-
-        /// 選択したAreaを保存
-        selectedArea.value = temporaryArea.value;
-
-        /// 移動前の初期値を代入
-        movedPosition.value = Offset(
-          min(temporaryArea.value!.firstPointX, temporaryArea.value!.secondPointX),
-          min(temporaryArea.value!.firstPointY, temporaryArea.value!.secondPointY),
-        );
-
-        /// 一時的なClipImageの範囲を設定
-        final Rect rect = Rect.fromPoints(Offset(selectedArea.value!.firstPointX, selectedArea.value!.firstPointY),
-            Offset(selectedArea.value!.secondPointX, selectedArea.value!.secondPointY));
-        if (pickImage == null) return;
-        ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
-      }
-    }
-
-    void handleChangeCanvasSelectMode() {
-      if (pickImage == null) return;
-
-      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.canvasSelect);
-      resetToNextArea();
-    }
-
     MoveDelta? convertDeltaAreaModel() {
       if (temporaryArea.value == null || selectedArea.value == null) {
         print('convertDeltaAreaModel args null');
@@ -185,6 +154,11 @@ class ReplaceEditPage extends HookConsumerWidget {
         dx: deltaX,
         dy: deltaY,
       );
+    }
+
+    void handleCancelMove() {
+      resetToNextArea();
+      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
     }
 
     Future<void> handleMovedSave() async {
@@ -210,6 +184,37 @@ class ReplaceEditPage extends HookConsumerWidget {
       final addData = ReplaceData(
           replaceDataId: replaceDataId, area: selectedArea.value!, moveDelta: MoveDelta(dx: delta.dx, dy: delta.dy));
       ref.read(replaceFormatStateProvider.notifier).addReplaceData(addData);
+      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
+      resetToNextArea();
+    }
+
+    void handleChangeMode() {
+      if (currentMode == ReplaceEditMode.moveSelect) {
+        handleMovedSave();
+      } else if (currentMode == ReplaceEditMode.areaSelect) {
+        ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.moveSelect);
+
+        /// 選択したAreaを保存
+        selectedArea.value = temporaryArea.value;
+
+        /// 移動前の初期値を代入
+        movedPosition.value = Offset(
+          min(temporaryArea.value!.firstPointX, temporaryArea.value!.secondPointX),
+          min(temporaryArea.value!.firstPointY, temporaryArea.value!.secondPointY),
+        );
+
+        /// 一時的なClipImageの範囲を設定
+        final Rect rect = Rect.fromPoints(Offset(selectedArea.value!.firstPointX, selectedArea.value!.firstPointY),
+            Offset(selectedArea.value!.secondPointX, selectedArea.value!.secondPointY));
+        if (pickImage == null) return;
+        ref.read(captureScreenStateProvider.notifier).clipImage(pickImage.image, rect);
+      }
+    }
+
+    void handleChangeCanvasSelectMode() {
+      if (pickImage == null) return;
+
+      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.canvasSelect);
       resetToNextArea();
     }
 
@@ -438,17 +443,37 @@ class ReplaceEditPage extends HookConsumerWidget {
                       /// 下のモードチェンジボタン
                       pickImage != null
                           ? Positioned(
-                              bottom: 20,
-                              right: 20,
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: const Color(MyColors.orange1),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Row(
-                                  children: [
-                                    currentMode == ReplaceEditMode.areaSelect
+                              bottom: 25,
+                              right: 25,
+                              child: Row(
+                                children: [
+                                  currentMode == ReplaceEditMode.moveSelect
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            handleCancelMove();
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.transparent,
+                                            ),
+                                            child: const Icon(
+                                              Icons.cancel,
+                                              color: Color(MyColors.orange1),
+                                              size: 50,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox.shrink(),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(MyColors.orange1),
+                                      border: Border.all(color: const Color(MyColors.orange1), width: 3),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: currentMode == ReplaceEditMode.areaSelect
                                         ? GestureDetector(
                                             onTap: () {
                                               if (temporaryArea.value == null) return;
@@ -480,18 +505,8 @@ class ReplaceEditPage extends HookConsumerWidget {
                                                 repeat: false,
                                                 width: 50,
                                                 height: 50)),
-                                    const SizedBox(width: 24),
-                                    IconButton(
-                                        onPressed: () {
-                                          handleMovedSave();
-                                        },
-                                        icon: FaIcon(
-                                          FontAwesomeIcons.check,
-                                          color: Theme.of(context).primaryColor,
-                                          size: 40,
-                                        ))
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             )
                           : const SizedBox(),
@@ -499,8 +514,8 @@ class ReplaceEditPage extends HookConsumerWidget {
                       /// canvas area select button
                       pickImage != null
                           ? Positioned(
-                              bottom: 20,
-                              left: 20,
+                              bottom: 25,
+                              left: 25,
                               child: Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
@@ -835,7 +850,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: Theme.of(context).primaryColor,
-                                          border: Border.all(color: const Color(MyColors.orange1), width: 3)),
+                                          border: Border.all(color: const Color(MyColors.orange1), width: 2)),
                                       child: slideAnimationController.isCompleted
                                           ? const Icon(Icons.arrow_forward, color: Color(MyColors.orange1), size: 32)
                                           : const Icon(Icons.arrow_back, color: Color(MyColors.orange1), size: 32),
@@ -849,7 +864,7 @@ class ReplaceDataListView extends HookConsumerWidget {
                                         decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: Theme.of(context).primaryColor,
-                                            border: Border.all(color: const Color(MyColors.orange1), width: 3)),
+                                            border: Border.all(color: const Color(MyColors.orange1), width: 2)),
                                         child: Text(list.length.toString(),
                                             style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)))),
                                   )

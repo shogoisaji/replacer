@@ -135,7 +135,7 @@ class ExportPage extends HookConsumerWidget {
     final w = MediaQuery.sizeOf(context).width;
 
     Future<void> handleSaveFormat() async {
-      final formatThumbnail = await ThumbnailResizeUint8ListConverter().convertFormatThumbnail(imageMemory, 100, 100);
+      final formatThumbnail = await ThumbnailResizeUint8ListConverter().convertFormatThumbnail(imageMemory, 300, 300);
       ref.read(replaceFormatStateProvider.notifier).setThumbnailImage(formatThumbnail);
       final currentFormat = ref.watch(replaceFormatStateProvider);
       final sqfliteRepository = SqfliteRepository.instance;
