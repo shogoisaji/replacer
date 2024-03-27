@@ -37,6 +37,16 @@ class ExportPage extends HookConsumerWidget {
       ref.read(loadingStateProvider.notifier).hide();
     }
 
+    double calculateConvertedImageAspectRatio() {
+      if (replaceFormat.canvasArea == null) {
+        final aspectRation = (pickImage!.image.width) / (pickImage.image.height);
+        return aspectRation;
+      }
+      final aspectRation = (replaceFormat.canvasArea!.firstPointX - replaceFormat.canvasArea!.secondPointX).abs() /
+          (replaceFormat.canvasArea!.firstPointY - replaceFormat.canvasArea!.secondPointY).abs();
+      return aspectRation;
+    }
+
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         convert();
@@ -82,7 +92,7 @@ class ExportPage extends HookConsumerWidget {
                         barrierDismissible: false,
                         context: context,
                         builder: (context) {
-                          return customDialog(context, ref, imageMemory.value!);
+                          return customDialog(context, ref, imageMemory.value!, calculateConvertedImageAspectRatio());
                         },
                       );
                     } else {
@@ -131,11 +141,12 @@ class ExportPage extends HookConsumerWidget {
     );
   }
 
-  Widget customDialog(BuildContext context, WidgetRef ref, Uint8List imageMemory) {
+  Widget customDialog(BuildContext context, WidgetRef ref, Uint8List imageMemory, double aspectRatio) {
     final w = MediaQuery.sizeOf(context).width;
 
     Future<void> handleSaveFormat() async {
-      final formatThumbnail = await ThumbnailResizeUint8ListConverter().convertFormatThumbnail(imageMemory, 300, 300);
+      final formatThumbnail =
+          await ThumbnailResizeUint8ListConverter().convertFormatThumbnail(imageMemory, 300, 300 ~/ aspectRatio);
       ref.read(replaceFormatStateProvider.notifier).setThumbnailImage(formatThumbnail);
       final currentFormat = ref.watch(replaceFormatStateProvider);
       final sqfliteRepository = SqfliteRepository.instance;
