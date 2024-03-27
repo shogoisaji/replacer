@@ -263,7 +263,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                   ))
               : const SizedBox(),
         ],
-        title: Text('Replace Edit', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
+        title: Text('ReplaceEdit', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
       ),
       body: PopScope(
         canPop: false,
@@ -644,7 +644,7 @@ class CanvasAreaSelector extends HookConsumerWidget {
     required this.imageSize,
   });
 
-  double get minSize => 150 * resizeRate;
+  double get minSize => 100 * resizeRate;
 
   bool updateValidate(AreaModel area) {
     if (area.secondPointX > imageSize.width) return false;

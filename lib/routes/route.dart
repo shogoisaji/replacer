@@ -35,7 +35,13 @@ GoRouter myRouter() {
         routes: pages
             .map((pageConfig) => GoRoute(
                   path: pageConfig.name,
-                  builder: (BuildContext context, GoRouterState state) {
+                  builder: (
+                    BuildContext context,
+                    GoRouterState state,
+                  ) {
+                    if (pageConfig.name == '/format_preview_page') {
+                      return FormatPreviewPage(formatId: state.extra as String);
+                    }
                     return pageConfig.page;
                   },
                 ))
