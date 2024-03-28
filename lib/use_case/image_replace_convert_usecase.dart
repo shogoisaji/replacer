@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/models/replace_format/replace_format.dart';
 import 'package:replacer/use_case/clip_image_usecase.dart';
+import 'package:replacer/utils/area_to_rectangle.dart';
 
 class ImageReplaceConvertUseCase {
   Future<Uint8List> convertImage(
@@ -16,8 +17,7 @@ class ImageReplaceConvertUseCase {
     final clippedImageDataList = <ClippedImageData>[];
     for (ReplaceData data in format.replaceDataList) {
       final area = data.area;
-      final rect =
-          Rect.fromPoints(Offset(area.firstPointX, area.firstPointY), Offset(area.secondPointX, area.secondPointY));
+      final rect = AreaToRectangle().convert(area);
       final clippedImage = await ClipImageUseCase().clipImage(image, rect);
       final offsetOrigin = Offset(min(area.firstPointX, area.secondPointX) + data.moveDelta.dx,
           min(area.firstPointY, area.secondPointY) + data.moveDelta.dy);
@@ -30,8 +30,9 @@ class ImageReplaceConvertUseCase {
 
     canvas.translate(-format.canvasArea!.firstPointX, -format.canvasArea!.firstPointY);
 
-    canvas.clipRect(Rect.fromPoints(Offset(format.canvasArea!.firstPointX, format.canvasArea!.firstPointY),
-        Offset(format.canvasArea!.secondPointX, format.canvasArea!.secondPointY)));
+    final canvasRect = AreaToRectangle().convert(format.canvasArea!);
+
+    canvas.clipRect(canvasRect);
 
     canvas.drawImage(image, Offset.zero, paint);
 
