@@ -21,6 +21,7 @@ class FormatPreviewPage extends HookConsumerWidget {
     final size = MediaQuery.sizeOf(context);
     final canvasAspectRatio = useState<double>(0.0);
     final format = useState<ReplaceFormat?>(null);
+    final isFocused = useState<bool>(false);
     final textEditingController = useTextEditingController();
     final titleFocusNode = useFocusNode();
 
@@ -53,6 +54,7 @@ class FormatPreviewPage extends HookConsumerWidget {
 
     useEffect(() {
       void onFocusChange() {
+        isFocused.value = titleFocusNode.hasFocus;
         print('Focus: ${titleFocusNode.hasFocus}');
         if (titleFocusNode.hasFocus) return;
         handleTextUpdate(textEditingController.text);
@@ -92,104 +94,108 @@ class FormatPreviewPage extends HookConsumerWidget {
             ),
             title: Text('FormatPreview', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
           ),
-          body: SafeArea(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.1, vertical: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _contentWidget('Date', format.value!.createdAt.toIso8601String().toYMDString()),
-                        const SizedBox(height: 16.0),
-                        Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          body: GestureDetector(
+            onTap: () {
+              if (FocusScope.of(context).hasFocus) {
+                primaryFocus?.unfocus();
+              }
+            },
+            child: SafeArea(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: size.width * 0.1, vertical: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                format.value!.createdAt.toIso8601String().toYMDString(),
+                                style: MyTextStyles.middleOrange,
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 8.0),
+                          Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(color: const Color(MyColors.orange1), width: 2.0),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text('Title', style: MyTextStyles.middleOrange),
+                                  const SizedBox(width: 16.0),
+                                  Expanded(
+                                    child: TextField(
+                                      focusNode: titleFocusNode,
+                                      cursorColor: const Color(MyColors.orange1),
+                                      controller: textEditingController,
+                                      textAlignVertical: TextAlignVertical.center,
+                                      decoration: const InputDecoration(
+                                        isDense: true,
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.only(bottom: 4.0),
+                                      ),
+                                      style: MyTextStyles.middleOrange,
+                                      onEditingComplete: () {
+                                        handleTextUpdate(textEditingController.text);
+                                      },
+                                    ),
+                                  ),
+                                  const FaIcon(FontAwesomeIcons.penToSquare, color: Color(MyColors.orange1))
+                                ],
+                              )),
+                          const SizedBox(height: 20.0),
+                          Container(
+                            width: size.width * 0.8,
+                            height: size.width * 0.8 / canvasAspectRatio.value,
+                            constraints: const BoxConstraints(
+                              maxWidth: 500,
+                            ),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(10.0),
                               border: Border.all(color: const Color(MyColors.orange1), width: 2.0),
                             ),
-                            child: Row(
-                              children: [
-                                Text('Title', style: MyTextStyles.middleOrange),
-                                const SizedBox(width: 16.0),
-                                Expanded(
-                                  child: TextField(
-                                    focusNode: titleFocusNode,
-                                    cursorColor: const Color(MyColors.orange1),
-                                    controller: textEditingController,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    decoration: const InputDecoration(
-                                      isDense: true,
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.only(bottom: 4.0),
-                                    ),
-                                    style: MyTextStyles.middleOrange,
-                                    onEditingComplete: () {
-                                      handleTextUpdate(textEditingController.text);
-                                    },
-                                  ),
-                                  //  Text(format!.formatName, style: MyTextStyles.middleOrange),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    //
-                                    titleFocusNode.requestFocus();
-                                    print('edit title');
-                                  },
-                                  child: const FaIcon(
-                                    FontAwesomeIcons.penToSquare,
-                                    color: Color(MyColors.orange1),
-                                  ),
-                                )
-                              ],
-                            )),
-                        const SizedBox(height: 20.0),
-                        Container(
-                          width: size.width * 0.8,
-                          height: size.width * 0.8 / canvasAspectRatio.value,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8.0),
-                            border: Border.all(color: const Color(MyColors.orange1), width: 2.0),
+                            child: format.value!.thumbnailImage != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.memory(format.value!.thumbnailImage!, fit: BoxFit.fitWidth))
+                                : const SizedBox.shrink(),
                           ),
-                          // child: format.value!.thumbnailImage != null
-                          //     ? Image.memory(format.value!.thumbnailImage!)
-                          //     : const Center(
-                          //         child: Text('No Image'),
-                          //       ),
-                        ),
-                        const SizedBox(height: 20.0),
-                        format.value!.thumbnailImage != null
-                            ? Image.memory(format.value!.thumbnailImage!)
-                            : const SizedBox.shrink(),
-                      ],
+                          const SizedBox(height: 20.0),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  right: 20,
-                  child: FloatingActionButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return customDialog(context, ref); // ここでcustomDialogを呼び出す
-                          },
-                        );
-                      },
-                      elevation: 2,
-                      backgroundColor: const Color(MyColors.orange1),
-                      child: FaIcon(
-                        FontAwesomeIcons.trashCan,
-                        size: 32,
-                        color: Theme.of(context).primaryColor,
-                      )),
-                ),
-              ],
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: FloatingActionButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return customDialog(context, ref); // ここでcustomDialogを呼び出す
+                            },
+                          );
+                        },
+                        elevation: 2,
+                        backgroundColor: const Color(MyColors.orange1),
+                        child: FaIcon(
+                          FontAwesomeIcons.trashCan,
+                          size: 32,
+                          color: Theme.of(context).primaryColor,
+                        )),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -212,22 +218,6 @@ class FormatPreviewPage extends HookConsumerWidget {
         title: Text('FormatPreview', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
       ),
     );
-  }
-
-  Widget _contentWidget(String contentName, String content) {
-    return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 7.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: const Color(MyColors.orange1), width: 2.0),
-        ),
-        child: Row(
-          children: [
-            Text(contentName, style: MyTextStyles.middleOrange),
-            const SizedBox(width: 16.0),
-            Expanded(child: Text(content, style: MyTextStyles.middleOrange)),
-          ],
-        ));
   }
 
   Widget customDialog(BuildContext context, WidgetRef ref) {

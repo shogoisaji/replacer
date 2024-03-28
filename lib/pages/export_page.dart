@@ -146,7 +146,7 @@ class ExportPage extends HookConsumerWidget {
 
     Future<void> handleSaveFormat() async {
       final formatThumbnail =
-          await ThumbnailResizeUint8ListConverter().convertFormatThumbnail(imageMemory, 300, 300 ~/ aspectRatio);
+          await ThumbnailResizeUint8ListConverter().convertFormatThumbnail(imageMemory, 500, 500 ~/ aspectRatio);
       ref.read(replaceFormatStateProvider.notifier).setThumbnailImage(formatThumbnail);
       final currentFormat = ref.watch(replaceFormatStateProvider);
       final sqfliteRepository = SqfliteRepository.instance;
@@ -171,7 +171,7 @@ class ExportPage extends HookConsumerWidget {
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Container(
-        width: w * 0.8,
+        width: (w * 0.8).clamp(300.0, 500.0),
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
