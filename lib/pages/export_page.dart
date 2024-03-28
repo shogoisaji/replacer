@@ -17,7 +17,8 @@ import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/custom_snack_bar.dart';
 
 class ExportPage extends HookConsumerWidget {
-  const ExportPage({super.key});
+  final bool isUseFormat;
+  const ExportPage({super.key, required this.isUseFormat});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -68,8 +69,13 @@ class ExportPage extends HookConsumerWidget {
           children: <Widget>[
             imageMemory.value != null
                 ? SingleChildScrollView(
-                    child: Column(
+                    child: Stack(
                       children: [
+                        Container(
+                          width: size.width,
+                          height: size.width / calculateConvertedImageAspectRatio(),
+                          color: Colors.white,
+                        ),
                         Image.memory(
                           imageMemory.value!,
                           width: size.width,
@@ -86,6 +92,12 @@ class ExportPage extends HookConsumerWidget {
                   onTap: () async {
                     if (imageMemory.value == null) return;
                     final result = await ImageSaveUseCase().saveImage(imageMemory.value!);
+                    if (isUseFormat && context.mounted) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(customSnackBar('Successfully saved Image', false, context));
+                      context.go('/');
+                      return;
+                    }
                     if (result == true && context.mounted) {
                       showDialog(
                         barrierColor: Colors.black.withOpacity(0.3),

@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'image_pick_state.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PickImageState extends _$PickImageState {
   @override
   PickImage? build() => null;

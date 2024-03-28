@@ -17,7 +17,7 @@ class PageConfig {
 List<PageConfig> pages = [
   const PageConfig(name: '/', page: HomePage()),
   const PageConfig(name: '/replace_edit_page', page: ReplaceEditPage()),
-  const PageConfig(name: '/export_page', page: ExportPage()),
+  const PageConfig(name: '/export_page', page: ExportPage(isUseFormat: false)),
   const PageConfig(name: '/format_preview_page', page: FormatPreviewPage()),
   const PageConfig(name: '/license', page: CustomLicensePage()),
 ];
@@ -41,6 +41,9 @@ GoRouter myRouter() {
                   ) {
                     if (pageConfig.name == '/format_preview_page') {
                       return FormatPreviewPage(formatId: state.extra as String);
+                    }
+                    if (pageConfig.name == '/export_page') {
+                      return ExportPage(isUseFormat: state.extra as bool);
                     }
                     return pageConfig.page;
                   },

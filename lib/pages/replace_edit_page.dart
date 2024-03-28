@@ -79,6 +79,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = null;
       selectedArea.value = null;
       movedPosition.value = Offset.zero;
+      ref.read(pickImageStateProvider.notifier).clear();
       ref.read(checkReplaceDataStateProvider.notifier).clear();
       ref.read(replaceThumbnailStateProvider.notifier).clear();
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
@@ -90,7 +91,6 @@ class ReplaceEditPage extends HookConsumerWidget {
     void handlePickImage() async {
       final pickImageSize = await ref.read(imagePickUseCaseProvider).pickImage();
       if (pickImageSize == null) return;
-      resetAll();
       if (replaceFormatData.canvasArea == null) {
         final area = AreaModel(
             firstPointX: 0,
@@ -163,7 +163,6 @@ class ReplaceEditPage extends HookConsumerWidget {
 
     MoveDelta? convertDeltaAreaModel() {
       if (temporaryArea.value == null || selectedArea.value == null) {
-        print('convertDeltaAreaModel args null');
         return null;
       }
       final deltaX = movedPosition.value.dx - min(selectedArea.value!.firstPointX, selectedArea.value!.secondPointX);
@@ -182,11 +181,9 @@ class ReplaceEditPage extends HookConsumerWidget {
 
     Future<void> handleMovedSave() async {
       if (movedPosition.value == Offset.zero) {
-        print('not move');
         return;
       }
       if (selectedArea.value == null) {
-        print('not selected area');
         return;
       }
 
@@ -197,7 +194,6 @@ class ReplaceEditPage extends HookConsumerWidget {
       final replaceDataId = (replaceFormatData.replaceDataList.length + 1).toString();
       final delta = convertDeltaAreaModel();
       if (delta == null) {
-        print('delta null');
         return;
       }
       final addData = ReplaceData(
@@ -326,7 +322,6 @@ class ReplaceEditPage extends HookConsumerWidget {
 
     AreaModel convertMovedAreaForCheck() {
       if (replaceCheckData == null) {
-        print('replaceCheckData null');
         return const AreaModel();
       }
       return AreaModel(
@@ -385,7 +380,7 @@ class ReplaceEditPage extends HookConsumerWidget {
           replaceFormatData.replaceDataList.isNotEmpty
               ? IconButton(
                   onPressed: () {
-                    context.push('/export_page');
+                    context.push('/export_page', extra: false);
                   },
                   padding: const EdgeInsets.only(right: 20),
                   icon: FaIcon(
@@ -622,7 +617,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                       pickImage != null
                           ? Positioned(
                               bottom: 15,
-                              right: 25,
+                              right: 15,
                               child: Row(
                                 children: [
                                   currentMode == ReplaceEditMode.areaSelect && isDetailAvailable.value
@@ -838,7 +833,6 @@ class ImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print('custom painter paint too many ?');
     paintImage(canvas: canvas, rect: Rect.fromLTWH(0, 0, size.width, size.height), image: image);
   }
 

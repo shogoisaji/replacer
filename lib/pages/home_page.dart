@@ -38,16 +38,12 @@ class HomePage extends HookConsumerWidget {
     ];
 
     void fetchFormatList() {
-      ref
-          .read(savedFormatListStateProvider.notifier)
-          .fetchFormatList()
-          .then((value) => print('fetchFormatList length: $value'));
+      ref.read(savedFormatListStateProvider.notifier).fetchFormatList();
     }
 
     void deleteFormat(String formatId) async {
       final sqfliteRepository = SqfliteRepository.instance;
-      final result = await sqfliteRepository.deleteRow(formatId);
-      print('delete result: $result');
+      await sqfliteRepository.deleteRow(formatId);
       fetchFormatList();
     }
 
@@ -241,7 +237,7 @@ class HomePage extends HookConsumerWidget {
         children: [
           Center(
               child: Text(format.formatName,
-                  style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor))),
+                  style: MyTextStyles.middleOrange.copyWith(color: Theme.of(context).primaryColor))),
           Expanded(
             child: Row(
               children: [

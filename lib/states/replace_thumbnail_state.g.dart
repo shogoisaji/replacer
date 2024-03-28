@@ -7,7 +7,7 @@ part of 'replace_thumbnail_state.dart';
 // **************************************************************************
 
 String _$replaceThumbnailStateHash() =>
-    r'f5822c33d9c767b5b9639e46d0b84eafbc0cd58e';
+    r'3533b6eedc0f4e55117bbcccbf1b3ae4935f3fc9';
 
 /// See also [ReplaceThumbnailState].
 @ProviderFor(ReplaceThumbnailState)

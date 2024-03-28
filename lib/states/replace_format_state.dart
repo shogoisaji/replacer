@@ -70,4 +70,8 @@ class ReplaceFormatState extends _$ReplaceFormatState {
       canvasArea: state.canvasArea,
     );
   }
+
+  void setReplaceFormat(ReplaceFormat newReplaceFormat) {
+    state = newReplaceFormat;
+  }
 }

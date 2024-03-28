@@ -54,7 +54,6 @@ class SqfliteRepository {
       final List<ReplaceFormat> allFormat = fetchData.map((e) => mapToFormat(e)).toList();
       return allFormat.isNotEmpty ? allFormat[0].formatId : '000000';
     } catch (e) {
-      print('Idの最大値を取得中にエラーが発生しました: $e');
       return '999999';
     }
   }
@@ -79,10 +78,8 @@ class SqfliteRepository {
         canvasArea: jsonEncode(format.canvasArea?.toJson()),
       };
       int result = await db.insert(formatTable, row);
-      print('データベースへの挿入が成功しました : $row');
       return result;
     } catch (e) {
-      print('データベースへの挿入中にエラーが発生しました: $e');
       return -1; // エラーが発生した場合は-1を返す
     }
   }
@@ -94,7 +91,6 @@ class SqfliteRepository {
       final List<ReplaceFormat> allFormat = fetchData.map((e) => mapToFormat(e)).toList();
       return allFormat;
     } catch (e) {
-      print('全てのフォーマットを取得中にエラーが発生しました: $e');
       return [];
     }
   }
@@ -115,7 +111,6 @@ class SqfliteRepository {
         return null;
       }
     } catch (e) {
-      print('IDによる検索中にエラーが発生しました: $e');
       return null;
     }
   }
@@ -136,7 +131,6 @@ class SqfliteRepository {
       );
       return format;
     } catch (e) {
-      print('マップからフォーマットへの変換中にエラーが発生しました: $e');
       throw Exception('マップからフォーマットへの変換に失敗しました');
     }
   }
@@ -154,7 +148,6 @@ class SqfliteRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      print('フォーマット名の更新中にエラーが発生しました: $e');
       return -1;
     }
   }
@@ -169,7 +162,6 @@ class SqfliteRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      print('行の削除中にエラーが発生しました: $e');
       return -1;
     }
   }
