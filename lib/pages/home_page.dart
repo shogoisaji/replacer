@@ -75,147 +75,149 @@ class HomePage extends HookConsumerWidget {
       backgroundColor: const Color(MyColors.orange1),
       body: SafeArea(
         bottom: false,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600),
-          width: double.infinity,
-          height: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                  height: 32,
-                  width: double.infinity,
-                  alignment: Alignment.centerRight,
-                  child: PopupMenuButton<Map<String, dynamic>>(
-                    color: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 600),
+            width: double.infinity,
+            height: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                    height: 32,
+                    width: double.infinity,
+                    alignment: Alignment.centerRight,
+                    child: PopupMenuButton<Map<String, dynamic>>(
+                      color: Theme.of(context).primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      icon: const Icon(Icons.menu, color: Color(MyColors.orange2), size: 28),
+                      onSelected: (Map<String, dynamic> item) {
+                        (item['func'] as Function).call();
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return menuItems.map((item) {
+                          return PopupMenuItem<Map<String, dynamic>>(
+                            value: item,
+                            child: Text(item['title'] as String, style: MyTextStyles.middleOrange),
+                          );
+                        }).toList();
+                      },
+                    )),
+                Text(
+                  'Replacer',
+                  style: MyTextStyles.title.copyWith(color: Theme.of(context).primaryColor),
+                ),
+                const SizedBox(height: 50),
+                Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(MyColors.orange1),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      ),
                     ),
-                    icon: const Icon(Icons.menu, color: Color(MyColors.orange2), size: 28),
-                    onSelected: (Map<String, dynamic> item) {
-                      (item['func'] as Function).call();
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return menuItems.map((item) {
-                        return PopupMenuItem<Map<String, dynamic>>(
-                          value: item,
-                          child: Text(item['title'] as String, style: MyTextStyles.middleOrange),
-                        );
-                      }).toList();
-                    },
-                  )),
-              Text(
-                'Replacer',
-                style: MyTextStyles.title.copyWith(color: Theme.of(context).primaryColor),
-              ),
-              const SizedBox(height: 50),
-              Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(
+                            'NewReplace',
+                            style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            context.push('/replace_edit_page');
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text('Edit',
+                                style: MyTextStyles.subtitle.copyWith(color: const Color(MyColors.orange1))),
+                          ),
+                        )
+                      ],
+                    )),
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  margin: const EdgeInsets.symmetric(vertical: 32),
                   decoration: BoxDecoration(
-                    color: const Color(MyColors.orange1),
+                    color: Theme.of(context).primaryColor,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
                       color: Theme.of(context).primaryColor,
                       width: 2,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          'NewReplace',
-                          style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          context.push('/replace_edit_page');
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child:
-                              Text('Edit', style: MyTextStyles.subtitle.copyWith(color: const Color(MyColors.orange1))),
-                        ),
-                      )
-                    ],
-                  )),
-              Container(
-                width: double.infinity,
-                height: 200,
-                margin: const EdgeInsets.symmetric(vertical: 32),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor,
-                    width: 2,
+                  child: Lottie.asset(
+                    'assets/lottie/demo.json',
+                    repeat: true,
                   ),
                 ),
-                child: Lottie.asset(
-                  'assets/lottie/demo.json',
-                  repeat: true,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    padding: const EdgeInsets.only(top: 0.8, left: 8, right: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(MyColors.orange1),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(22),
-                        topRight: Radius.circular(22),
+                Expanded(
+                  child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      padding: const EdgeInsets.only(top: 0.8, left: 8, right: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(MyColors.orange1),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(22),
+                          topRight: Radius.circular(22),
+                        ),
+                        border: Border(
+                          top: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                          left: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                          right: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                        ),
                       ),
-                      border: Border(
-                        top: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-                        left: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-                        right: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-                      ),
-                    ),
-                    child: CustomScrollView(
-                      slivers: <Widget>[
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 6, left: 8),
-                            child: Text(
-                              'ReplaceFormat',
-                              style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor),
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 6, left: 8),
+                              child: Text(
+                                'ReplaceFormat',
+                                style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor),
+                              ),
                             ),
                           ),
-                        ),
-                        SliverGrid(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 8,
+                          SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 8,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                return GestureDetector(
+                                    onTap: () {
+                                      context.push('/format_preview_page', extra: formatList[index].formatId);
+                                    },
+                                    child: gridItem(formatList[index], context));
+                              },
+                              childCount: formatList.length,
+                            ),
                           ),
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              return GestureDetector(
-                                  onTap: () {
-                                    context.push('/format_preview_page', extra: formatList[index].formatId);
-                                  },
-                                  child: gridItem(formatList[index], context));
-                            },
-                            childCount: formatList.length,
+                          const SliverToBoxAdapter(
+                            child: SizedBox(height: 100),
                           ),
-                        ),
-                        const SliverToBoxAdapter(
-                          child: SizedBox(height: 100),
-                        ),
-                      ],
-                    )),
-              )
-            ],
+                        ],
+                      )),
+                )
+              ],
+            ),
           ),
         ),
       ),
