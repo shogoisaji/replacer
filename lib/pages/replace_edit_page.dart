@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -37,6 +38,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     final movedPosition = useState<Offset>(Offset.zero);
     final temporaryArea = useState<AreaModel?>(null); // before move
     final selectedArea = useState<AreaModel?>(null); // after move
+    final pointerAnimationController = useAnimationController(duration: const Duration(milliseconds: 800));
     final lottieController = useAnimationController(duration: const Duration(milliseconds: 2000), initialValue: 1);
     final currentMode = ref.watch(replaceEditStateProvider);
     final pickImage = ref.watch(pickImageStateProvider);
@@ -45,6 +47,13 @@ class ReplaceEditPage extends HookConsumerWidget {
     final replaceCheckData = ref.watch(checkReplaceDataStateProvider);
     final displaySizeRate = useState(1.0); // 画像が画面がへoverflowした場合に小さくする用
     final imageSizeConvertRate = useState(1.0); // pickImage width / display width
+
+    final TweenSequence<double> pointerAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.2, end: 0.9), weight: 1.0),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 0.8), weight: 0.6),
+      TweenSequenceItem(tween: Tween(begin: 0.8, end: 1.2), weight: 0.7),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 0.8),
+    ]);
 
     void resetToNextArea() {
       temporaryFirstPoint.value = null;
@@ -123,23 +132,17 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     void handleSecondPointSelect(details) {
+      final nextSecondPointX = details.localPosition.dx * imageSizeConvertRate.value;
+      final nextSecondPointY = details.localPosition.dy * imageSizeConvertRate.value;
+      if (nextSecondPointX > pickImage!.image.width || nextSecondPointY > pickImage.image.height) return;
       if (currentMode == ReplaceEditMode.areaSelect) {
         temporaryArea.value = AreaModel(
           firstPointX: temporaryFirstPoint.value!.dx,
           firstPointY: temporaryFirstPoint.value!.dy,
-          secondPointX: details.localPosition.dx * imageSizeConvertRate.value,
-          secondPointY: details.localPosition.dy * imageSizeConvertRate.value,
+          secondPointX: nextSecondPointX,
+          secondPointY: nextSecondPointY,
         );
       }
-    }
-
-    void handleSelectedAreaDrag(details) {
-      temporaryArea.value = AreaModel(
-        firstPointX: temporaryArea.value!.firstPointX + details.delta.dx * imageSizeConvertRate.value,
-        firstPointY: temporaryArea.value!.firstPointY + details.delta.dy * imageSizeConvertRate.value,
-        secondPointX: temporaryArea.value!.secondPointX + details.delta.dx * imageSizeConvertRate.value,
-        secondPointY: temporaryArea.value!.secondPointY + details.delta.dy * imageSizeConvertRate.value,
-      );
     }
 
     MoveDelta? convertDeltaAreaModel() {
@@ -188,6 +191,12 @@ class ReplaceEditPage extends HookConsumerWidget {
       resetToNextArea();
     }
 
+    void handleAreaDetailMode() {
+      pointerAnimationController.reset();
+      pointerAnimationController.forward();
+      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaDetailSelect);
+    }
+
     void handleChangeMode() {
       if (currentMode == ReplaceEditMode.moveSelect) {
         handleMovedSave();
@@ -213,7 +222,8 @@ class ReplaceEditPage extends HookConsumerWidget {
 
     void handleChangeCanvasSelectMode() {
       if (pickImage == null) return;
-
+      pointerAnimationController.reset();
+      pointerAnimationController.forward();
       ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.canvasSelect);
       resetToNextArea();
     }
@@ -265,8 +275,10 @@ class ReplaceEditPage extends HookConsumerWidget {
         ],
         title: Text('ReplaceEdit', style: MyTextStyles.subtitle.copyWith(color: Theme.of(context).primaryColor)),
       ),
+
+      /// イメージがある場合はデバイスのバックを無効化
       body: PopScope(
-        canPop: false,
+        canPop: pickImage != null ? false : true,
         child: SafeArea(
           bottom: false,
           child: Stack(
@@ -319,16 +331,11 @@ class ReplaceEditPage extends HookConsumerWidget {
                   : const SizedBox(),
 
               /// selectable area
-              GestureDetector(
-                onPanUpdate: (details) {
-                  handleSelectedAreaDrag(details);
-                },
-                child: AreaSelectWidget(
-                  area: temporaryArea.value ?? const AreaModel(),
-                  color: const Color(MyColors.orange1),
-                  isSelected: currentMode == ReplaceEditMode.moveSelect,
-                  resizeRate: imageSizeConvertRate.value,
-                ),
+              AreaSelectWidget(
+                area: temporaryArea.value ?? const AreaModel(),
+                color: const Color(MyColors.orange1),
+                isSelected: currentMode == ReplaceEditMode.moveSelect,
+                resizeRate: imageSizeConvertRate.value,
               ),
 
               /// キャプチャした画像
@@ -409,11 +416,46 @@ class ReplaceEditPage extends HookConsumerWidget {
                   ? CanvasAreaSelector(
                       resizeRate: imageSizeConvertRate.value,
                       imageSize: Size(pickImage.image.width.toDouble(), pickImage.image.height.toDouble()),
-                    )
+                      animation: pointerAnimation.animate(pointerAnimationController))
                   : const SizedBox.shrink(),
 
-              currentMode != ReplaceEditMode.canvasSelect
-                  ? Stack(fit: StackFit.expand, children: [
+              currentMode == ReplaceEditMode.canvasSelect || currentMode == ReplaceEditMode.areaDetailSelect
+                  ? Positioned(
+                      top: h / 2,
+                      right: 5,
+                      child: GestureDetector(
+                        onTap: () {
+                          ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
+                        },
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(MyColors.orange1), width: 3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 3,
+                                offset: const Offset(0, 0),
+                              ),
+                            ],
+                          ),
+                          child: Align(
+                            child: currentMode == ReplaceEditMode.canvasSelect
+                                ? Lottie.asset('assets/lottie/resize_done.json',
+                                    addRepaintBoundary: true, repeat: true, width: 50, height: 50)
+                                :
+
+                                /// TODO:あとで変える
+                                Lottie.asset('assets/lottie/move.json',
+                                    addRepaintBoundary: true, repeat: true, width: 50, height: 50),
+                          ),
+                        ),
+                      ))
+                  : Stack(fit: StackFit.expand, children: [
                       /// replace data list
                       replaceFormatData.replaceDataList.isNotEmpty
                           ? Positioned(
@@ -447,20 +489,46 @@ class ReplaceEditPage extends HookConsumerWidget {
                               right: 25,
                               child: Row(
                                 children: [
+                                  currentMode == ReplaceEditMode.areaSelect && temporaryArea.value != null
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            handleAreaDetailMode();
+                                          },
+                                          child: Container(
+                                            width: 40,
+                                            height: 40,
+                                            margin: const EdgeInsets.only(right: 8),
+                                            decoration: const BoxDecoration(
+                                              color: Color(MyColors.orange1),
+                                              shape: BoxShape.circle,
+                                            ),
+
+                                            /// TODO: あとで変える
+                                            child: Icon(
+                                              Icons.details,
+                                              color: Theme.of(context).primaryColor,
+                                              size: 30,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox.shrink(),
                                   currentMode == ReplaceEditMode.moveSelect
                                       ? GestureDetector(
                                           onTap: () {
                                             handleCancelMove();
                                           },
                                           child: Container(
-                                            padding: const EdgeInsets.all(10),
+                                            width: 40,
+                                            height: 40,
+                                            margin: const EdgeInsets.only(right: 8),
                                             decoration: const BoxDecoration(
-                                              color: Colors.transparent,
-                                            ),
-                                            child: const Icon(
-                                              Icons.cancel,
                                               color: Color(MyColors.orange1),
-                                              size: 50,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.clear,
+                                              color: Theme.of(context).primaryColor,
+                                              size: 30,
                                             ),
                                           ),
                                         )
@@ -471,7 +539,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                                     decoration: BoxDecoration(
                                       color: const Color(MyColors.orange1),
                                       border: Border.all(color: const Color(MyColors.orange1), width: 3),
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: currentMode == ReplaceEditMode.areaSelect
                                         ? GestureDetector(
@@ -535,81 +603,75 @@ class ReplaceEditPage extends HookConsumerWidget {
                       /// current mode label
                       pickImage != null
                           ? Positioned(
-                              top: 10,
-                              right: 10,
-                              child: currentMode != ReplaceEditMode.canvasSelect
+                              top: 15,
+                              right: 12,
+                              child: currentMode != ReplaceEditMode.areaSelect
                                   ? Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor,
+                                        borderRadius: BorderRadius.circular(100),
+                                        border: Border.all(color: const Color(MyColors.orange1), width: 3),
+                                      ),
+                                      child: Text(
+                                        "Move a Selected Area",
+                                        style: MyTextStyles.middleOrange,
+                                      ))
+                                  : Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: const Color(MyColors.orange1),
                                         borderRadius: BorderRadius.circular(100),
                                         border: Border.all(color: Theme.of(context).primaryColor, width: 3),
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            currentMode.modeName,
-                                            style: MyTextStyles.body.copyWith(color: Theme.of(context).primaryColor),
-                                          ),
-                                          Text(
-                                            'Mode',
-                                            style: MyTextStyles.small.copyWith(color: Theme.of(context).primaryColor),
-                                          ),
-                                          const SizedBox(height: 3),
-                                        ],
-                                      ))
-                                  : Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor,
-                                        borderRadius: BorderRadius.circular(100),
-                                        border: Border.all(color: const Color(MyColors.orange1), width: 3.5),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            currentMode.modeName,
-                                            style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
-                                          ),
-                                          Text(
-                                            'Mode',
-                                            style: MyTextStyles.small.copyWith(color: const Color(MyColors.orange1)),
-                                          ),
-                                          const SizedBox(height: 3),
-                                        ],
+                                      child: Text(
+                                        "Select an Area",
+                                        style:
+                                            MyTextStyles.middleOrange.copyWith(color: Theme.of(context).primaryColor),
                                       )),
                             )
                           : const SizedBox.shrink(),
-                    ])
-                  : Positioned(
-                      top: h / 2,
-                      right: 5,
-                      child: GestureDetector(
-                        onTap: () {
-                          ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
-                        },
-                        child: Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: const Color(MyColors.orange1), width: 3),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                spreadRadius: 2,
-                                blurRadius: 3,
-                                offset: const Offset(0, 0),
-                              ),
-                            ],
-                          ),
-                          child: Align(
-                            child: Lottie.asset('assets/lottie/resize_done.json',
-                                addRepaintBoundary: true, repeat: true, width: 50, height: 50),
-                          ),
-                        ),
-                      )),
+                    ]),
+
+              /// detail area select
+              currentMode == ReplaceEditMode.areaDetailSelect
+                  ? Stack(
+                      children: [
+                        Positioned(
+                            top: 25,
+                            left: 25,
+                            child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  //
+                                },
+                                child: AreaSelectPointer(pointerAnimation.animate(pointerAnimationController)))),
+                        Positioned(
+                            top: 25,
+                            right: 25,
+                            child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  //
+                                },
+                                child: AreaSelectPointer(pointerAnimation.animate(pointerAnimationController)))),
+                        Positioned(
+                            bottom: 40,
+                            left: 25,
+                            child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  //
+                                },
+                                child: AreaSelectPointer(pointerAnimation.animate(pointerAnimationController)))),
+                        Positioned(
+                            bottom: 40,
+                            right: 25,
+                            child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  //
+                                },
+                                child: AreaSelectPointer(pointerAnimation.animate(pointerAnimationController)))),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
         ),
@@ -638,10 +700,12 @@ class ImagePainter extends CustomPainter {
 class CanvasAreaSelector extends HookConsumerWidget {
   final double resizeRate;
   final Size imageSize;
+  final Animation animation;
   const CanvasAreaSelector({
     super.key,
     required this.resizeRate,
     required this.imageSize,
+    required this.animation,
   });
 
   double get minSize => 100 * resizeRate;
@@ -654,21 +718,6 @@ class CanvasAreaSelector extends HookConsumerWidget {
     if ((area.firstPointX - area.secondPointX).abs() < minSize) return false;
     if ((area.firstPointY - area.secondPointY).abs() < minSize) return false;
     return true;
-  }
-
-  Widget areaSelectPointer(BuildContext context) {
-    return Container(
-      color: Colors.transparent,
-      padding: const EdgeInsets.all(8),
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-            border: Border.all(color: const Color(MyColors.red1), width: 3),
-            color: Theme.of(context).primaryColor,
-            shape: BoxShape.circle),
-      ),
-    );
   }
 
   @override
@@ -714,7 +763,7 @@ class CanvasAreaSelector extends HookConsumerWidget {
                               if (!updateValidate(updateArea)) return;
                               ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
                             },
-                            child: areaSelectPointer(context),
+                            child: AreaSelectPointer(animation),
                           ),
                         ),
                         Positioned(
@@ -734,7 +783,7 @@ class CanvasAreaSelector extends HookConsumerWidget {
                               if (!updateValidate(updateArea)) return;
                               ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
                             },
-                            child: areaSelectPointer(context),
+                            child: AreaSelectPointer(animation),
                           ),
                         ),
                         Positioned(
@@ -754,7 +803,7 @@ class CanvasAreaSelector extends HookConsumerWidget {
                               if (!updateValidate(updateArea)) return;
                               ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
                             },
-                            child: areaSelectPointer(context),
+                            child: AreaSelectPointer(animation),
                           ),
                         ),
                         Positioned(
@@ -774,7 +823,7 @@ class CanvasAreaSelector extends HookConsumerWidget {
                               if (!updateValidate(updateArea)) return;
                               ref.read(replaceFormatStateProvider.notifier).setCanvasArea(updateArea);
                             },
-                            child: areaSelectPointer(context),
+                            child: AreaSelectPointer(animation),
                           ),
                         ),
                       ],
@@ -940,6 +989,43 @@ class ReplaceDataListView extends HookConsumerWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AreaSelectPointer extends StatelessWidget {
+  final Animation animation;
+  const AreaSelectPointer(this.animation, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.transparent,
+      padding: const EdgeInsets.all(8),
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: animation.value,
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                  border: Border.all(color: const Color(MyColors.red1), width: 3),
+                  color: Theme.of(context).primaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      spreadRadius: 1.5,
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]),
+            ),
+          );
+        },
       ),
     );
   }
