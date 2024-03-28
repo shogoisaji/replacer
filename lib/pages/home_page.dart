@@ -201,8 +201,8 @@ class HomePage extends HookConsumerWidget {
                           delegate: SliverChildBuilderDelegate(
                             (BuildContext context, int index) {
                               return GestureDetector(
-                                  onLongPress: () async {
-                                    deleteFormat(formatList[index].formatId);
+                                  onTap: () {
+                                    context.push('/format_preview_page', extra: formatList[index].formatId);
                                   },
                                   child: gridItem(formatList[index], context));
                             },
