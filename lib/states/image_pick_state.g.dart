@@ -6,12 +6,12 @@ part of 'image_pick_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pickImageStateHash() => r'356efd9b8a059060a56da486098caa5aa2274842';
+String _$pickImageStateHash() => r'55a5b84cc9b9ec14e553e1c5a579e77cff2cc30f';
 
 /// See also [PickImageState].
 @ProviderFor(PickImageState)
 final pickImageStateProvider =
-    AutoDisposeNotifierProvider<PickImageState, PickImage?>.internal(
+    NotifierProvider<PickImageState, PickImage?>.internal(
   PickImageState.new,
   name: r'pickImageStateProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -21,6 +21,6 @@ final pickImageStateProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$PickImageState = AutoDisposeNotifier<PickImage?>;
+typedef _$PickImageState = Notifier<PickImage?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

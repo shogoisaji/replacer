@@ -7,7 +7,7 @@ part of 'replace_format_state.dart';
 // **************************************************************************
 
 String _$replaceFormatStateHash() =>
-    r'a628b0ebf3d12d985280e948c3524fad30246e00';
+    r'b9cd677d60135e522262bf87cc1c787571cc2593';
 
 /// See also [ReplaceFormatState].
 @ProviderFor(ReplaceFormatState)

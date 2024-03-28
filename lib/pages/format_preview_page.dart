@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:replacer/models/replace_format/replace_format.dart';
 import 'package:replacer/repositories/sqflite/sqflite_repository.dart';
+import 'package:replacer/states/replace_format_state.dart';
 import 'package:replacer/states/saved_format_list_state.dart';
 import 'package:replacer/string.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
+import 'package:replacer/use_case/image_pick_usecase.dart';
 import 'package:replacer/widgets/custom_snack_bar.dart';
 
 class FormatPreviewPage extends HookConsumerWidget {
@@ -25,16 +27,9 @@ class FormatPreviewPage extends HookConsumerWidget {
     final textEditingController = useTextEditingController();
     final titleFocusNode = useFocusNode();
 
-    void handleDeleteFormat(String id) async {
-      final sqfliteRepository = SqfliteRepository.instance;
-      final result = await sqfliteRepository.deleteRow(id);
-      print('delete result: $result');
-    }
-
     void handleTextUpdate(String value) async {
       if (textEditingController.text == format.value!.formatName) return;
-      final result = await SqfliteRepository.instance.updateFormatName(formatId!, value);
-      print('update result: $result');
+      await SqfliteRepository.instance.updateFormatName(formatId!, value);
       ref.read(savedFormatListStateProvider.notifier).fetchFormatList();
     }
 
@@ -52,10 +47,18 @@ class FormatPreviewPage extends HookConsumerWidget {
       textEditingController.value = TextEditingValue(text: format.value!.formatName);
     }
 
+    void handlePickImage() async {
+      if (format.value == null) return;
+      await ref.read(imagePickUseCaseProvider).pickImage();
+      ref.read(replaceFormatStateProvider.notifier).setReplaceFormat(format.value!);
+      Future.delayed(const Duration(milliseconds: 0), () {
+        context.push('/export_page', extra: true);
+      });
+    }
+
     useEffect(() {
       void onFocusChange() {
         isFocused.value = titleFocusNode.hasFocus;
-        print('Focus: ${titleFocusNode.hasFocus}');
         if (titleFocusNode.hasFocus) return;
         handleTextUpdate(textEditingController.text);
       }
@@ -142,12 +145,13 @@ class FormatPreviewPage extends HookConsumerWidget {
                                         border: InputBorder.none,
                                         contentPadding: EdgeInsets.only(bottom: 4.0),
                                       ),
-                                      style: MyTextStyles.middleOrange,
+                                      style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
                                       onEditingComplete: () {
                                         handleTextUpdate(textEditingController.text);
                                       },
                                     ),
                                   ),
+                                  const SizedBox(width: 6.0),
                                   const FaIcon(FontAwesomeIcons.penToSquare, color: Color(MyColors.orange1))
                                 ],
                               )),
@@ -176,13 +180,13 @@ class FormatPreviewPage extends HookConsumerWidget {
                   ),
                   Positioned(
                     bottom: 20,
-                    right: 20,
+                    left: 20,
                     child: FloatingActionButton(
                         onPressed: () {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return customDialog(context, ref); // ここでcustomDialogを呼び出す
+                              return customDialog(context, ref);
                             },
                           );
                         },
@@ -193,6 +197,33 @@ class FormatPreviewPage extends HookConsumerWidget {
                           size: 32,
                           color: Theme.of(context).primaryColor,
                         )),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: GestureDetector(
+                      onTap: () {
+                        handlePickImage();
+                      },
+                      child: Container(
+                          height: 60,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: const Color(MyColors.orange1),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                offset: const Offset(0, 2),
+                                blurRadius: 4,
+                              )
+                            ],
+                          ),
+                          child: Center(
+                            child: Text('UseFormat',
+                                style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)),
+                          )),
+                    ),
                   ),
                 ],
               ),

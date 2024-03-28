@@ -30,7 +30,6 @@ class ReplaceEditState extends _$ReplaceEditState {
   ReplaceEditMode build() => ReplaceEditMode.areaSelect;
 
   void changeMode(ReplaceEditMode mode) {
-    print('mode: $mode');
     state = mode;
   }
 }

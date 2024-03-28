@@ -25,8 +25,7 @@ class ImagePickUseCase {
       ref.read(pickImageStateProvider.notifier).setPickImage(convertedImage);
       ref.read(loadingStateProvider.notifier).hide();
       return Size(convertedImage.width.toDouble(), convertedImage.height.toDouble());
-    } on PlatformException catch (e) {
-      print('Failed to pick image: $e');
+    } on PlatformException catch (_) {
       return null;
     }
   }
@@ -39,9 +38,7 @@ class ImagePickUseCase {
       int width = image.width;
       int height = image.height;
       return Size(width.toDouble(), height.toDouble());
-    } else {
-      print('画像をデコードできませんでした。');
-    }
+    } else {}
     return null;
   }
 }
