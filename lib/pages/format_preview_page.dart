@@ -125,7 +125,7 @@ class FormatPreviewPage extends HookConsumerWidget {
                           ),
                           const SizedBox(height: 8.0),
                           Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                              padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8.0),
                                 border: Border.all(color: const Color(MyColors.orange1), width: 2.0),
@@ -133,7 +133,7 @@ class FormatPreviewPage extends HookConsumerWidget {
                               child: Row(
                                 children: [
                                   Text('Title', style: MyTextStyles.middleOrange),
-                                  const SizedBox(width: 16.0),
+                                  const SizedBox(width: 8.0),
                                   Expanded(
                                     child: TextField(
                                       focusNode: titleFocusNode,
@@ -145,7 +145,8 @@ class FormatPreviewPage extends HookConsumerWidget {
                                         border: InputBorder.none,
                                         contentPadding: EdgeInsets.only(bottom: 4.0),
                                       ),
-                                      style: MyTextStyles.body.copyWith(color: const Color(MyColors.orange1)),
+                                      style: MyTextStyles.body
+                                          .copyWith(color: const Color(MyColors.orange1), fontWeight: FontWeight.w700),
                                       onEditingComplete: () {
                                         handleTextUpdate(textEditingController.text);
                                       },
@@ -157,8 +158,8 @@ class FormatPreviewPage extends HookConsumerWidget {
                               )),
                           const SizedBox(height: 20.0),
                           Container(
-                            width: size.width * 0.8,
-                            height: size.width * 0.8 / canvasAspectRatio.value,
+                            // width: size.width * 0.8,
+                            // height: size.width * 0.8 / canvasAspectRatio.value,
                             constraints: const BoxConstraints(
                               maxWidth: 500,
                             ),
@@ -170,7 +171,7 @@ class FormatPreviewPage extends HookConsumerWidget {
                             child: format.value!.thumbnailImage != null
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.memory(format.value!.thumbnailImage!, fit: BoxFit.fitWidth))
+                                    child: Image.memory(format.value!.thumbnailImage!, fit: BoxFit.fill))
                                 : const SizedBox.shrink(),
                           ),
                           const SizedBox(height: 20.0),

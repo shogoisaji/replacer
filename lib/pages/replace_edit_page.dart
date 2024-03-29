@@ -180,9 +180,7 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     Future<void> handleMovedSave() async {
-      if (movedPosition.value == Offset.zero) {
-        return;
-      }
+      if (!lottieEffectController.isAnimating) return; // select areaが動いていれば
       if (selectedArea.value == null) {
         return;
       }
@@ -338,11 +336,12 @@ class ReplaceEditPage extends HookConsumerWidget {
     }
 
     useEffect(() {
+      if (pickImage == null) return;
       lottieSelectorController.reset();
       lottieSelectorController.forward();
 
       return null;
-    }, [currentMode]);
+    }, [currentMode, pickImage]);
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -406,7 +405,8 @@ class ReplaceEditPage extends HookConsumerWidget {
                       top: 0,
                       left: 0,
                       child: RepaintBoundary(
-                        child: SizedBox(
+                        child: Container(
+                          color: Colors.yellow,
                           width: w * displaySizeRate.value,
                           height: pickImage.image.height / pickImage.image.width * w * displaySizeRate.value,
                           child: CustomPaint(
@@ -543,15 +543,15 @@ class ReplaceEditPage extends HookConsumerWidget {
 
               currentMode == ReplaceEditMode.canvasSelect || currentMode == ReplaceEditMode.areaDetailSelect
                   ? Positioned(
-                      top: h / 2,
-                      right: 5,
+                      top: h / 2 - 70 / 2,
+                      right: 10,
                       child: GestureDetector(
                         onTap: () {
                           ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
                         },
                         child: Container(
-                          width: 70,
-                          height: 70,
+                          width: 60,
+                          height: 60,
                           decoration: BoxDecoration(
                             color: Theme.of(context).primaryColor,
                             shape: BoxShape.circle,
@@ -566,24 +566,8 @@ class ReplaceEditPage extends HookConsumerWidget {
                             ],
                           ),
                           child: Align(
-                              child: currentMode == ReplaceEditMode.canvasSelect
-                                  ? Lottie.asset('assets/lottie/resize_done.json',
-                                      addRepaintBoundary: true, repeat: true, width: 50, height: 50)
-                                  : Stack(
-                                      children: [
-                                        Center(
-                                          child: Lottie.asset('assets/lottie/detail.json',
-                                              addRepaintBoundary: true, repeat: false, width: 40, height: 40),
-                                        ),
-                                        const Center(
-                                          child: Icon(
-                                            Icons.check,
-                                            color: Color(MyColors.orange1),
-                                            size: 30,
-                                          ),
-                                        )
-                                      ],
-                                    )),
+                              child: Lottie.asset('assets/lottie/done.json',
+                                  addRepaintBoundary: true, repeat: false, width: 50, height: 50)),
                         ),
                       ))
                   : Stack(fit: StackFit.expand, children: [
@@ -833,7 +817,7 @@ class ImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    paintImage(canvas: canvas, rect: Rect.fromLTWH(0, 0, size.width, size.height), image: image);
+    paintImage(canvas: canvas, rect: Rect.fromLTWH(0, 0, size.width, size.height), image: image, fit: BoxFit.fill);
   }
 
   @override
@@ -1005,6 +989,14 @@ class ReplaceDataListView extends HookConsumerWidget {
     void handleTapThumbnail(int index) {
       ref.read(checkReplaceDataStateProvider.notifier).setData(list[index]!);
     }
+
+    useEffect(() {
+      if (thumbnailList.length == 1) {
+        slideAnimationController.forward();
+      }
+
+      return null;
+    }, [thumbnailList]);
 
     return SizedBox(
       width: w,
