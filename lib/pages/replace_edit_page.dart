@@ -580,15 +580,15 @@ class ReplaceEditPage extends HookConsumerWidget {
                       /// 下のプラスボタン
                       pickImage == null
                           ? Positioned(
-                              bottom: 50,
-                              right: 50,
+                              bottom: 70,
+                              right: 55,
                               child: GestureDetector(
                                 onTap: () {
                                   handlePickImage();
                                 },
                                 child: SizedBox(
-                                    width: 60,
-                                    height: 60,
+                                    width: 65,
+                                    height: 65,
                                     child: Lottie.asset(
                                       'assets/lottie/add.json',
                                       repeat: true,

@@ -158,8 +158,6 @@ class FormatPreviewPage extends HookConsumerWidget {
                               )),
                           const SizedBox(height: 20.0),
                           Container(
-                            // width: size.width * 0.8,
-                            // height: size.width * 0.8 / canvasAspectRatio.value,
                             constraints: const BoxConstraints(
                               maxWidth: 500,
                             ),
@@ -211,7 +209,7 @@ class FormatPreviewPage extends HookConsumerWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
                             color: const Color(MyColors.orange1),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -222,7 +220,8 @@ class FormatPreviewPage extends HookConsumerWidget {
                           ),
                           child: Center(
                             child: Text('UseFormat',
-                                style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)),
+                                style: MyTextStyles.subtitle
+                                    .copyWith(color: Theme.of(context).primaryColor, fontSize: 28)),
                           )),
                     ),
                   ),

@@ -114,7 +114,7 @@ class ExportPage extends HookConsumerWidget {
                     }
                   },
                   child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(MyColors.orange1),
                         borderRadius: BorderRadius.circular(100),
@@ -122,7 +122,13 @@ class ExportPage extends HookConsumerWidget {
                       ),
                       child: Column(
                         children: [
-                          Text('Save', style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)),
+                          Text('Image',
+                              style: MyTextStyles.middleOrange
+                                  .copyWith(color: Theme.of(context).primaryColor, height: 0.7)),
+                          const SizedBox(height: 4),
+                          Text('Save',
+                              style:
+                                  MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor, height: 0.7)),
                         ],
                       )),
                 )),
@@ -134,7 +140,7 @@ class ExportPage extends HookConsumerWidget {
                     context.pop();
                   },
                   child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(100),
@@ -197,11 +203,11 @@ class ExportPage extends HookConsumerWidget {
               style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1)),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 12.0,
             ),
             Text(
-              'Save this format ?',
-              style: MyTextStyles.middleOrange,
+              'Save this Format ?',
+              style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1)),
             ),
             const SizedBox(
               height: 20.0,
