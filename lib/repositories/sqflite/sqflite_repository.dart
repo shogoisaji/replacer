@@ -7,7 +7,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class SqfliteRepository {
-  static const _databaseName = "sqflite_Database8.db";
+  static const _databaseName = "sqflite_Database_dist.db";
   static const _databaseVersion = 1;
   static const formatTable = 'formatTable';
 

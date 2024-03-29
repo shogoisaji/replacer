@@ -12,6 +12,7 @@ import 'package:replacer/string.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
+import 'package:replacer/use_case/refresh_cache_usecase.dart';
 import 'package:replacer/widgets/custom_snack_bar.dart';
 
 class FormatPreviewPage extends HookConsumerWidget {
@@ -49,7 +50,8 @@ class FormatPreviewPage extends HookConsumerWidget {
 
     void handlePickImage() async {
       if (format.value == null) return;
-      await ref.read(imagePickUseCaseProvider).pickImage();
+      final result = await ref.read(imagePickUseCaseProvider).pickImage();
+      if (result == null) return;
       ref.read(replaceFormatStateProvider.notifier).setReplaceFormat(format.value!);
       Future.delayed(const Duration(milliseconds: 0), () {
         context.push('/export_page', extra: true);
@@ -92,6 +94,7 @@ class FormatPreviewPage extends HookConsumerWidget {
                 size: 32,
               ),
               onPressed: () {
+                ref.read(refreshCacheUseCaseProvider.notifier).execute();
                 context.go('/');
               },
             ),
@@ -243,6 +246,7 @@ class FormatPreviewPage extends HookConsumerWidget {
             size: 32,
           ),
           onPressed: () {
+            ref.read(refreshCacheUseCaseProvider.notifier).execute();
             context.go('/');
           },
         ),
@@ -262,6 +266,7 @@ class FormatPreviewPage extends HookConsumerWidget {
       if (result > 0) {
         await ref.read(savedFormatListStateProvider.notifier).fetchFormatList();
         if (context.mounted) {
+          ref.read(refreshCacheUseCaseProvider.notifier).execute();
           context.go('/');
         }
       } else {
