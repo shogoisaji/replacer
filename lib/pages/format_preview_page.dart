@@ -277,7 +277,7 @@ class FormatPreviewPage extends HookConsumerWidget {
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Container(
-        width: w * 0.8,
+        width: (w * 0.8).clamp(300.0, 500.0),
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
