@@ -106,7 +106,7 @@ class HomePage extends HookConsumerWidget {
                   'Replacer',
                   style: MyTextStyles.title.copyWith(color: Theme.of(context).primaryColor),
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 40),
                 Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                     decoration: BoxDecoration(
@@ -147,7 +147,7 @@ class HomePage extends HookConsumerWidget {
                     )),
                 Container(
                   width: double.infinity,
-                  height: 200,
+                  height: 170,
                   margin: const EdgeInsets.symmetric(vertical: 32),
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,

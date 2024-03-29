@@ -72,14 +72,13 @@ class ExportPage extends HookConsumerWidget {
                     child: Stack(
                       children: [
                         Container(
-                          width: size.width,
-                          height: size.width / calculateConvertedImageAspectRatio(),
-                          color: Colors.white,
-                        ),
-                        Image.memory(
-                          imageMemory.value!,
-                          width: size.width,
-                        ),
+                            width: size.width,
+                            height: size.width / calculateConvertedImageAspectRatio(),
+                            color: Colors.white,
+                            child: Image.memory(
+                              imageMemory.value!,
+                              fit: BoxFit.fill,
+                            )),
                         const SizedBox(height: 100),
                       ],
                     ),
