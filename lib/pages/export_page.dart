@@ -13,6 +13,7 @@ import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_replace_convert_usecase.dart';
 import 'package:replacer/use_case/image_save_usecase.dart';
+import 'package:replacer/use_case/refresh_cache_usecase.dart';
 import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/custom_snack_bar.dart';
 
@@ -67,7 +68,7 @@ class ExportPage extends HookConsumerWidget {
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            imageMemory.value != null
+            imageMemory.value != null && pickImage != null
                 ? SingleChildScrollView(
                     child: Stack(
                       children: [
@@ -91,13 +92,13 @@ class ExportPage extends HookConsumerWidget {
                   onTap: () async {
                     if (imageMemory.value == null) return;
                     final result = await ImageSaveUseCase().saveImage(imageMemory.value!);
-                    if (isUseFormat && context.mounted) {
+                    if (result == true && isUseFormat && context.mounted) {
                       ScaffoldMessenger.of(context)
                           .showSnackBar(customSnackBar('Successfully saved Image', false, context));
+                      ref.read(refreshCacheUseCaseProvider.notifier).execute();
                       context.go('/');
                       return;
-                    }
-                    if (result == true && context.mounted) {
+                    } else if (result == true && context.mounted) {
                       showDialog(
                         barrierColor: Colors.black.withOpacity(0.3),
                         barrierDismissible: false,
@@ -114,7 +115,7 @@ class ExportPage extends HookConsumerWidget {
                     }
                   },
                   child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(MyColors.orange1),
                         borderRadius: BorderRadius.circular(100),
@@ -122,7 +123,13 @@ class ExportPage extends HookConsumerWidget {
                       ),
                       child: Column(
                         children: [
-                          Text('Save', style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)),
+                          Text('Image',
+                              style: MyTextStyles.middleOrange
+                                  .copyWith(color: Theme.of(context).primaryColor, height: 0.7)),
+                          const SizedBox(height: 4),
+                          Text('Save',
+                              style:
+                                  MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor, height: 0.7)),
                         ],
                       )),
                 )),
@@ -134,7 +141,7 @@ class ExportPage extends HookConsumerWidget {
                     context.pop();
                   },
                   child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(100),
@@ -167,6 +174,7 @@ class ExportPage extends HookConsumerWidget {
           ref.read(savedFormatListStateProvider.notifier).fetchFormatList();
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(customSnackBar('Successfully saved Format', false, context));
+          ref.read(refreshCacheUseCaseProvider.notifier).execute();
           context.go('/');
         }
       } else {
@@ -197,11 +205,11 @@ class ExportPage extends HookConsumerWidget {
               style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1)),
             ),
             const SizedBox(
-              height: 8.0,
+              height: 12.0,
             ),
             Text(
-              'Save this format ?',
-              style: MyTextStyles.middleOrange,
+              'Save this Format ?',
+              style: MyTextStyles.largeBody.copyWith(color: const Color(MyColors.orange1)),
             ),
             const SizedBox(
               height: 20.0,

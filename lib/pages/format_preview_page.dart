@@ -12,6 +12,7 @@ import 'package:replacer/string.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
+import 'package:replacer/use_case/refresh_cache_usecase.dart';
 import 'package:replacer/widgets/custom_snack_bar.dart';
 
 class FormatPreviewPage extends HookConsumerWidget {
@@ -49,7 +50,8 @@ class FormatPreviewPage extends HookConsumerWidget {
 
     void handlePickImage() async {
       if (format.value == null) return;
-      await ref.read(imagePickUseCaseProvider).pickImage();
+      final result = await ref.read(imagePickUseCaseProvider).pickImage();
+      if (result == null) return;
       ref.read(replaceFormatStateProvider.notifier).setReplaceFormat(format.value!);
       Future.delayed(const Duration(milliseconds: 0), () {
         context.push('/export_page', extra: true);
@@ -92,6 +94,7 @@ class FormatPreviewPage extends HookConsumerWidget {
                 size: 32,
               ),
               onPressed: () {
+                ref.read(refreshCacheUseCaseProvider.notifier).execute();
                 context.go('/');
               },
             ),
@@ -158,8 +161,6 @@ class FormatPreviewPage extends HookConsumerWidget {
                               )),
                           const SizedBox(height: 20.0),
                           Container(
-                            // width: size.width * 0.8,
-                            // height: size.width * 0.8 / canvasAspectRatio.value,
                             constraints: const BoxConstraints(
                               maxWidth: 500,
                             ),
@@ -211,7 +212,7 @@ class FormatPreviewPage extends HookConsumerWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
                             color: const Color(MyColors.orange1),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -222,7 +223,8 @@ class FormatPreviewPage extends HookConsumerWidget {
                           ),
                           child: Center(
                             child: Text('UseFormat',
-                                style: MyTextStyles.largeBody.copyWith(color: Theme.of(context).primaryColor)),
+                                style: MyTextStyles.subtitle
+                                    .copyWith(color: Theme.of(context).primaryColor, fontSize: 28)),
                           )),
                     ),
                   ),
@@ -244,6 +246,7 @@ class FormatPreviewPage extends HookConsumerWidget {
             size: 32,
           ),
           onPressed: () {
+            ref.read(refreshCacheUseCaseProvider.notifier).execute();
             context.go('/');
           },
         ),
@@ -263,6 +266,7 @@ class FormatPreviewPage extends HookConsumerWidget {
       if (result > 0) {
         await ref.read(savedFormatListStateProvider.notifier).fetchFormatList();
         if (context.mounted) {
+          ref.read(refreshCacheUseCaseProvider.notifier).execute();
           context.go('/');
         }
       } else {
@@ -277,7 +281,7 @@ class FormatPreviewPage extends HookConsumerWidget {
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Container(
-        width: w * 0.8,
+        width: (w * 0.8).clamp(300.0, 500.0),
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,

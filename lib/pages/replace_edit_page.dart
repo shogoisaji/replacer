@@ -16,13 +16,13 @@ import 'package:replacer/models/replace_data/replace_data.dart';
 import 'package:replacer/states/capture_screen_state.dart';
 import 'package:replacer/states/check_replace_data_state.dart';
 import 'package:replacer/states/image_pick_state.dart';
-import 'package:replacer/states/replace_edit_page_state.dart';
 import 'package:replacer/states/replace_edit_state.dart';
 import 'package:replacer/states/replace_format_state.dart';
 import 'package:replacer/states/replace_thumbnail_state.dart';
 import 'package:replacer/theme/color_theme.dart';
 import 'package:replacer/theme/text_style.dart';
 import 'package:replacer/use_case/image_pick_usecase.dart';
+import 'package:replacer/use_case/refresh_cache_usecase.dart';
 import 'package:replacer/utils/area_to_rectangle.dart';
 import 'package:replacer/utils/thumbnail_resize_converter.dart';
 import 'package:replacer/widgets/area_select_widget.dart';
@@ -79,13 +79,7 @@ class ReplaceEditPage extends HookConsumerWidget {
       temporaryArea.value = null;
       selectedArea.value = null;
       movedPosition.value = Offset.zero;
-      ref.read(pickImageStateProvider.notifier).clear();
-      ref.read(checkReplaceDataStateProvider.notifier).clear();
-      ref.read(replaceThumbnailStateProvider.notifier).clear();
-      ref.read(replaceEditStateProvider.notifier).changeMode(ReplaceEditMode.areaSelect);
-      ref.read(replaceEditPageStateProvider.notifier).clear();
-      ref.read(captureScreenStateProvider.notifier).clear();
-      ref.read(replaceFormatStateProvider.notifier).resetFormat();
+      ref.read(refreshCacheUseCaseProvider.notifier).execute();
     }
 
     void handlePickImage() async {
@@ -405,8 +399,7 @@ class ReplaceEditPage extends HookConsumerWidget {
                       top: 0,
                       left: 0,
                       child: RepaintBoundary(
-                        child: Container(
-                          color: Colors.yellow,
+                        child: SizedBox(
                           width: w * displaySizeRate.value,
                           height: pickImage.image.height / pickImage.image.width * w * displaySizeRate.value,
                           child: CustomPaint(
@@ -580,15 +573,15 @@ class ReplaceEditPage extends HookConsumerWidget {
                       /// 下のプラスボタン
                       pickImage == null
                           ? Positioned(
-                              bottom: 50,
-                              right: 50,
+                              bottom: 70,
+                              right: 55,
                               child: GestureDetector(
                                 onTap: () {
                                   handlePickImage();
                                 },
                                 child: SizedBox(
-                                    width: 60,
-                                    height: 60,
+                                    width: 65,
+                                    height: 65,
                                     child: Lottie.asset(
                                       'assets/lottie/add.json',
                                       repeat: true,

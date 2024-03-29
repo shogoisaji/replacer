@@ -8,6 +8,5 @@ part 'pick_image.freezed.dart';
 class PickImage with _$PickImage {
   const factory PickImage({
     required ui.Image image,
-    // required Size size,
   }) = _PickImage;
 }
